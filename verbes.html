@@ -204,6 +204,8 @@ input.bad{background:var(--bad-bg);border-color:var(--bad)}
 .grades .btn::after{content:""}
 .grades small{display:block;font-weight:400;opacity:.8;font-size:0.75rem}
 .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:20px}
+.opts.wide{grid-template-columns:1fr}
+.opts.wide .opt{text-align:left;padding:10px 16px;font-size:1.0625rem}
 .opt{min-height:52px;border:1.5px solid var(--text);background:transparent;border-radius:0;font-size:1.125rem;font-weight:700}
 .opt:not(:disabled):hover{background:var(--text);color:var(--bg)}
 .opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
@@ -862,7 +864,7 @@ function wireBoxes(){app.querySelectorAll('.boxbtn').forEach(b=>b.onclick=()=>st
 // Richtung und Antwortart direkt beim Lernen umstellen
 function quickOpts(){
   return`<div class="quick"><div class="qrow"><span class="qlbl">Richtung</span>${seg('qdir',[['de','DE → FR'],['fr','FR → DE'],['mix','Gemischt']],S.dir,'Abfragerichtung')}</div>
-  <div class="qrow"><span class="qlbl">Antworten</span>${seg('qans',[['type','Eintippen'],['flip','Karteikarte']],S.opt.answer,'Antworten')}</div></div>`;
+  <div class="qrow"><span class="qlbl">Antworten</span>${seg('qans',[['type','Tippen'],['flip','Karte'],['choice','Auswahl']],S.opt.answer,'Antworten')}</div></div>`;
 }
 function wireQuick(rerender){app.querySelectorAll('input[name=qdir],input[name=qans]').forEach(r=>r.onchange=()=>{
   if(r.name==='qdir')S.dir=r.value;else S.opt.answer=r.value;save();rerender();
@@ -958,7 +960,7 @@ function settings(){
   </div></section>
   <section class="section"><h2>Abfrage</h2><div class="group">
     <div class="setrow"><label class="lbl" for="strict"><b>Akzente streng bewerten</b><span>Ein fehlender oder falscher Akzent zählt als Fehler statt als «fast richtig».</span></label><input type="checkbox" class="toggle" id="strict" ${o.strict?'checked':''}></div>
-  </div><p class="hint">Richtung und Antwortart (Eintippen oder Karteikarte) stellst du direkt über dem Lernen-Knopf um.</p></section>
+  </div><p class="hint">Richtung und Antwortart (Tippen, Karteikarte oder Auswahl) stellst du direkt über dem Lernen-Knopf um. Verben fragt «Auswahl» weiterhin zum Eintippen ab, die Prüfung immer.</p></section>
   <section class="section"><h2>Runden</h2><div class="group">
     <div class="setrow col"><div class="lbl"><b>Fragen pro Runde</b><span>Gilt für «Lernkartei üben», «Fällige lernen» und die Prüfung. In der Prüfung werden die Fragen gleichmässig auf alle Themen verteilt. «Alle durchgehen» nimmt immer alle Karten.</span></div>${seg('examLen',[[10,'10'],[20,'20'],[30,'30'],[50,'50']],o.examLen,'Fragen pro Runde')}</div>
   </div></section>
@@ -1060,6 +1062,7 @@ const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label
 
 function render(){
   if(S.opt.answer==='flip'&&!S.session.exam)return renderFlip();
+  if(S.opt.answer==='choice'&&!S.session.exam&&cur.c.type!=='verb')return renderChoice();
   const {c,dir}=cur,t=TOP[c.topic].title;
   if(c.type==='verb')return renderVerb();
   if(c.type==='vocab'&&dir==='fr'){
@@ -1133,6 +1136,50 @@ function leaveTo(t){
   cur=null;const ok=t&&TOP[t];
   try{history.replaceState(null,'',ok?'#t-'+t:location.pathname+location.search)}catch(e){}
   ok?topicPage(t):home();scrollTo(0,0);
+}
+// ----- Auswählen statt Eintippen -----
+const REL_OPTS=['qui','que','où','dont','ce qui','ce que','lequel','laquelle','lesquels','lesquelles','auquel','auxquels','auxquelles','duquel'];
+const POSS_OPTS=['le mien','la mienne','les miens','les miennes','le tien','la tienne','les tiens','les tiennes','le sien','la sienne','les siens','les siennes','le nôtre','la nôtre','les nôtres','le vôtre','la vôtre','les vôtres','le leur','la leur','les leurs'];
+function choicesFor(c,dir){
+  // Richtige Antwort + zufällige falsche; bei festen Listen in der Reihenfolge der Liste
+  const pick=(list,right,n,keep)=>{const o=shuffle([...new Set(list.filter(x=>x&&x!==right))]).slice(0,n).concat(right);return keep?o.sort((a,b)=>list.indexOf(a)-list.indexOf(b)):shuffle(o)};
+  if(c.type==='item'){
+    if(c.o)return{opts:c.o,acc:c.a};
+    const a=c.a[0];
+    const fill=(must,list,n)=>{const o=[...new Set([...must,a])];shuffle(list.filter(x=>!o.includes(x))).slice(0,Math.max(0,n-o.length)).forEach(x=>o.push(x));return o.sort((x,y)=>list.indexOf(x)-list.indexOf(y))};
+    // Relativpronomen: qui, que, où, dont sind immer dabei
+    if(c.topic==='rel')return{opts:fill(['qui','que','où','dont'],REL_OPTS,6),acc:c.a};
+    // Possessivpronomen: alle Formen derselben Person, dazu zwei andere
+    if(c.topic==='poss'){const grp=POSS_OPTS.filter(x=>x.split(' ')[1].replace(/(nne|n|ns|nnes|e|es|s)$/,'')===a.split(' ')[1].replace(/(nne|n|ns|nnes|e|es|s)$/,''));return{opts:fill(grp,POSS_OPTS,grp.length+2),acc:c.a}}
+    return{opts:pick(Object.values(CARDS).filter(x=>x.type==='item'&&x.topic===c.topic&&!x.o).map(x=>x.a[0]),a,3),acc:c.a};
+  }
+  const same=Object.values(CARDS).filter(x=>x.type===c.type);
+  if(dir==='fr')return{opts:pick(same.map(x=>x.de),c.de,3),acc:[c.de],lang:'de',wide:true};
+  return{opts:pick(same.map(x=>x.fr),c.fr,3),acc:[c.fr],lang:'fr',wide:true};
+}
+function renderChoice(){
+  const {c,dir}=cur,t=TOP[c.topic].title;
+  const ch=cur.ch=choicesFor(c,dir);cur.phase='ask';
+  let prompt,lab=`${t} · Auswählen`;
+  if(c.type==='item')prompt=`<p class="word q" lang="fr">${gapify(c.q)}</p>${c.h?`<p class="qhint">${esc(c.h)}</p>`:''}`;
+  else if(dir==='fr')prompt=`<h1 class="word" lang="fr">${esc(c.fr)}</h1><p class="qhint">Was heisst das auf Deutsch?</p>`;
+  else prompt=`<h1 class="word" lang="de">${esc(c.de)}</h1><p class="qhint">${c.type==='pair'?'Welche Ergänzung ist richtig?':'Was heisst das auf Französisch?'}</p>`;
+  const wide=ch.wide||ch.opts.some(o=>o.length>14);
+  app.innerHTML=frame(lab,prompt,`<div class="opts${wide?' wide':''}">${ch.opts.map(o=>`<button class="opt" data-o="${esc(o)}" lang="${ch.lang||'fr'}">${esc(o)}</button>`).join('')}</div><div id="fix"></div>`);
+  wire();
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>checkChoice(b.dataset.o));
+  app.querySelector('.opt').focus();
+}
+function checkChoice(v){
+  if(cur.phase!=='ask')return;
+  const {c}=cur,ok=cur.ch.acc.includes(v);
+  cur.errors=ok?0:1;cur.phase='checked';
+  app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(cur.ch.acc.includes(b.dataset.o))b.classList.add('ok');else if(b.dataset.o===v)b.classList.add('bad')});
+  if(c.type==='vocab')$('fix').innerHTML=forms(c);
+  let why=c.w||'';
+  if(c.type==='vocab'&&!ok)why=`${esc(c.fr)} = ${esc(c.de)}`;
+  if(c.type==='pair'&&!ok)why=`<b lang="fr">${esc(c.fr)}</b> – ${esc(c.de)}`;
+  showGrades(ok?2:0,`<span class="res ${ok?'ok':'bad'}">${ok?'✓ Richtig':'✗ Falsch'}</span>`,why);
 }
 function wire(){
   $('quit').onclick=()=>leaveTo(S.session&&S.session.topic);
@@ -1241,7 +1288,7 @@ function insert(ch){const i=last;if(!i||i.readOnly)return;const a=i.selectionSta
 document.addEventListener('keydown',e=>{
   if(!cur||!S.session)return;
   if(cur.flip&&cur.phase==='ask'&&(e.key===' '||e.key==='Enter')){e.preventDefault();flipCard();return}
-  if(cur.phase==='ask'&&cur.c.o&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
+  if(cur.phase==='ask'&&(cur.c.o||cur.ch)&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
   if(cur.phase!=='checked'||S.session.exam)return;
   if(S.session.mode==='box'||S.session.mode==='free'){if(e.key==='Enter'){e.preventDefault();const b=app.querySelector('#actions .btn.primary');b&&b.click()}return}
   if(e.key==='Enter'){e.preventDefault();grade(cur.sug)}
