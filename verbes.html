@@ -117,6 +117,21 @@ button{font:inherit;color:inherit;cursor:pointer}
 .conj td{padding:5px 20px 5px 0;border-bottom:1px solid color-mix(in srgb,var(--bg) 25%,transparent)}
 .conj td:first-child{opacity:.75}
 @media (prefers-reduced-motion:reduce){.flip-in{transition:none}}
+/* Grosse Bildschirme: Steuerung links, Inhalt rechts */
+.kbd{display:none}
+@media (hover:hover) and (pointer:fine){.kbd{display:block;margin-top:16px}}
+@media (min-width:1024px){
+  main.wide{max-width:1240px;padding-left:max(40px,env(safe-area-inset-left));padding-right:max(40px,env(safe-area-inset-right))}
+  body:has(main.wide) footer{max-width:1240px;padding-left:40px;padding-right:40px}
+  main.wide h1{font-size:clamp(3rem,5vw,4.5rem)}
+  .cols{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:clamp(48px,5vw,72px);align-items:start}
+  .content .ex{max-width:68ch}
+}
+@media (min-width:1280px){
+  .topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:40px}
+  .section .topics .topic:last-child{border-bottom:0}
+}
+@media (min-width:1024px) and (min-height:900px){.ctrl{position:sticky;top:24px}}
 /* Schnell-Optionen beim Lernen */
 .quick{display:grid;gap:10px;margin:24px 0 20px}
 .qrow{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:12px}
@@ -871,9 +886,11 @@ function home(){
   cur=null;
   const all=cardsOf(),k=counts(all),s=S.session;
   const groups=[...new Set(TOPICS.map(t=>t.group))];
+  app.className='wide';
   app.innerHTML=`
   ${topbar('')}
   <h1>Dossier 5</h1><p class="sub">Vokabeln, Verben und Grammatik für die Prüfung.</p>
+  <div class="cols"><aside class="ctrl" aria-label="Lernen">
   <section class="section"><h2>${BOX()?'Lernkartei':'Heute'}</h2>
     ${BOX()?boxStrip(all):`<div class="stats">
       <div class="stat"><b>${k.due}</b><span>fällig</span></div>
@@ -886,7 +903,9 @@ function home(){
     <button class="btn" id="exam">Prüfung starten (${S.opt.examLen} Fragen)</button>
   </section>
   ${BOX()?'':`<section class="section"><h2>Gesamtfortschritt</h2><div class="card">${prog(all,true)}</div>${LEGEND()}</section>`}
-  ${groups.map(g=>`<section class="section"><h2>${g}</h2>${TOPICS.filter(t=>t.group===g).map(topicRow).join('')}</section>`).join('')}`;
+  </aside><div class="content">
+  ${groups.map(g=>`<section class="section"><h2>${g}</h2><div class="topics">${TOPICS.filter(t=>t.group===g).map(topicRow).join('')}</div></section>`).join('')}
+  </div></div>`;
   on('resume',next_);on('due',()=>start('due',null));on('exam',startExam);
   app.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>start('due',b.dataset.learn));
   wireBoxes();wireQuick(home);
@@ -905,8 +924,10 @@ function topicPage(tid){
     <div class="card"><div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:'am Lernen',sure:SURE()}[st];
       return`<button class="chip" data-fr="${v.fr}" aria-pressed="${S.sel.includes(v.fr)}" aria-label="${v.fr}, ${lab}"><span class="st" aria-hidden="true">${sym}</span>${v.fr}</button>`}).join('')}</div></div>
     <p class="legend">○ neu · ◐ am Lernen · ● ${SURE()} · Nur ausgewählte Verben werden abgefragt.</p></section>`;
+  app.className='wide';
   app.innerHTML=`${topbar(t.title)}
   <h1>${t.title}</h1><p class="sub">${t.sub}</p>
+  <div class="cols"><aside class="ctrl" aria-label="Lernen">
   <section class="section"><h2>Fortschritt</h2><div class="card">${prog(ids,true)}${c.due?`<p class="duehint">${c.due} von ${c.total} ${DUEW()}.</p>`:nextDue(ids)}</div>${LEGEND()}</section>
   <section class="section"><h2>${BOX()?'Lernkartei':'Lernen'}</h2>
     ${BOX()?boxStrip(ids,tid).replace('<p class="hint">','<p class="hint" style="margin:0 0 16px">'):''}
@@ -915,9 +936,11 @@ function topicPage(tid){
     <button class="btn" id="all" ${c.total?'':'disabled'}>Alle ${c.total} durchgehen</button>
     <p class="hint">${BOX()?'«Alle durchgehen» nimmt jede Karte einmal dran, auch die aus Fach 5.':'«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.'}</p>
   </section>
+  </aside><div class="content">
   ${verbSel}
   <section class="section"><h2>Erklärung</h2><div class="card ex">${EXPLAIN[tid]||''}${extra}</div></section>
-  <section class="section"><span id="treset"><button class="link danger" id="tresetBtn">Fortschritt dieses Themas zurücksetzen</button></span></section>`;
+  <section class="section"><span id="treset"><button class="link danger" id="tresetBtn">Fortschritt dieses Themas zurücksetzen</button></span></section>
+  </div></div>`;
   $('learn').onclick=()=>start('due',tid);$('all').onclick=()=>start('all',tid);wireBoxes();wireQuick(()=>topicPage(tid));
   confirmReset('treset',`${t.title} zurücksetzen?`,()=>{
     const del=tid==='verbs'?VERBS.map(v=>'v:'+v.fr):ids;del.forEach(id=>{delete S.cards[id];delete S.box[id]});
@@ -934,6 +957,7 @@ function settings(){
   cur=null;
   const o=S.opt;
   const methodHint=o.method==='box'?'Wie eine Karteibox mit 5 Fächern: Richtig → die Karte rückt ein Fach weiter, falsch → zurück in Fach 1. In Fach 5 gilt sie als gelernt.':'Die Seite plant für jede Aufgabe, wann du sie wiederholst. Nach jeder Antwort sagst du, wie schwer sie war.';
+  app.className='';
   app.innerHTML=`${topbar('Einstellungen')}<h1>Einstellungen</h1>
   <section class="section"><h2>Lernmethode</h2><div class="group">
     <div class="setrow col"><div class="lbl"><b>So lernst du</b><span>${methodHint}</span></div>${seg('method',[['box','Lernkartei'],['plan','Wiederholungsplan']],o.method,'Lernmethode')}</div>
@@ -1010,11 +1034,12 @@ function next_(){
   render();
 }
 function frame(label,promptHtml,body){
-  const s=S.session;
+  const s=S.session;app.className='';
+  const kb=cur.flip?'Leertaste dreht die Karte um · Esc beendet die Runde':cur.c.o?'Tasten 1–8 wählen eine Antwort · Esc beendet die Runde':'Enter prüft · Esc beendet die Runde';
   return`<div class="top"><button class="link" id="quit">‹ Beenden</button><span class="count">${s.done} / ${s.total}</span></div>
   <div class="bar"><i style="width:${s.done/s.total*100}%"></i></div>
   <section class="card"><div class="tense">${label}</div>${promptHtml}<div id="inf"></div></section>${body}
-  <div id="actions"></div>`;
+  <div id="actions"></div><p class="hint kbd">${kb}</p>`;
 }
 const ACC=()=>!S.opt.accBar?'':`<div class="acc" aria-label="Akzente">${'é è ê ë à â ç î ï ô û ù œ'.split(' ').map(a=>`<button tabindex="-1" data-a="${a}">${a}</button>`).join('')}</div>`;
 const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
@@ -1131,7 +1156,7 @@ function showGrades(sug,msg,why){
   const names=['Nochmals','Schwer','Gut','Einfach'];
   $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}
   <div class="grades">${names.map((n,g)=>`<button class="btn ${g===sug?'primary':''}" data-g="${g}">${n}<small>${preview(cur.id,g)}</small></button>`).join('')}</div>
-  <p class="hint">Enter wählt den Vorschlag, Tasten 1–4 wählen direkt.</p>`;
+  <p class="hint kbd">Enter wählt den Vorschlag, Tasten 1–4 wählen direkt.</p>`;
   app.querySelectorAll('.grades .btn').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
   app.querySelector('.grades .primary').focus();
   cur.phase='checked';
@@ -1186,6 +1211,7 @@ let last=null;document.addEventListener('focusin',e=>{if(e.target.matches('input
 function insert(ch){const i=last;if(!i||i.readOnly)return;const a=i.selectionStart??i.value.length,b=i.selectionEnd??a;i.value=i.value.slice(0,a)+ch+i.value.slice(b);i.focus();i.setSelectionRange(a+1,a+1)}
 document.addEventListener('keydown',e=>{
   if(!cur||!S.session)return;
+  if(e.key==='Escape'){const q=$('quit');if(q){e.preventDefault();q.click()}return}
   if(cur.flip&&cur.phase==='ask'&&(e.key===' '||e.key==='Enter')){e.preventDefault();flipCard();return}
   if(cur.phase==='ask'&&cur.c.o&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
   if(cur.phase!=='checked'||S.session.exam)return;
@@ -1203,7 +1229,7 @@ function grade(g){
   save();next_();
 }
 function done(s){
-  cur=null;
+  cur=null;app.className='';
   if(s&&s.exam){
     const note=s.max?Math.round((5*s.pts/s.max+1)*2)/2:1;
     const weak=Object.entries(s.weak).sort((a,b)=>b[1]-a[1]);
@@ -1231,7 +1257,7 @@ datenschutz:`<h1>Datenschutz</h1>
 <p>Du kannst jederzeit per E-Mail Auskunft über deine Daten verlangen oder ihrer Bearbeitung widersprechen.</p>
 <h2>Keine Gewähr für die Inhalte</h2>
 <p>Die Vokabeln, Konjugationen, Übungen und Erklärungen habe ich mit Sorgfalt zusammengestellt. Trotzdem können Fehler darin sein, und ich übernehme keine Gewähr für Richtigkeit und Vollständigkeit. Verlass dich im Zweifel auf dein Lehrmittel oder frag deine Lehrperson. Wenn du einen Fehler findest, schreib mir gerne eine E-Mail.</p>`};
-function legal(k){cur=null;app.innerHTML=`${topbar('Datenschutz')}<article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
+function legal(k){cur=null;app.className='';app.innerHTML=`${topbar('Datenschutz')}<article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
 function route(){
   const k=location.hash.slice(1);
   scrollTo(0,0);
