@@ -187,10 +187,10 @@ footer p{margin:0;display:flex;align-items:center;gap:8px;min-height:44px}
 <script>
 // ===== Vor dem Veröffentlichen ausfüllen =====
 const OWNER={
-  name:'[Vorname Nachname]',
-  email:'[E-Mail-Adresse]',
-  host:'[Name des Hosting-Anbieters]',
-  hostCountry:'[Land des Servers, z. B. Schweiz]',
+  name:'Silvan Burkhard',
+  email:'burkhard.silvan.timon@gmail.com',
+  host:'GitHub Pages (GitHub, Inc.)',
+  hostCountry:'USA',
 };
 // ============================================
 
@@ -1064,12 +1064,12 @@ function done(s){
 const LEGAL={
 datenschutz:`<h1>Datenschutz</h1>
 <h2>Verantwortlich</h2>
-<p>${OWNER.name}, E-Mail: ${OWNER.email}</p>
+<p>${OWNER.name}, E-Mail: <a href="mailto:${OWNER.email}">${OWNER.email}</a></p>
 <h2>Speicherung in deinem Browser</h2>
 <p>Die Seite speichert deine Auswahl, deine Einstellungen und deinen Lernstand im Local Storage deines Browsers, damit der Wiederholungsplan funktioniert. Diese Daten bleiben auf deinem Gerät und werden nicht an mich oder Dritte übertragen. Es gibt keine Cookies, kein Tracking und keine Inhalte von Drittanbietern.</p>
 <p>Du kannst diese Speicherung ablehnen oder die Daten löschen: mit «Zurücksetzen» in den Einstellungen oder indem du die Websitedaten in deinem Browser löschst bzw. sperrst. Der Trainer merkt sich dann deinen Fortschritt nicht mehr.</p>
 <h2>Hosting</h2>
-<p>Die Seite wird von ${OWNER.host} (${OWNER.hostCountry}) bereitgestellt. Beim Aufruf verarbeitet der Anbieter technisch notwendige Daten wie deine IP-Adresse, um die Seite auszuliefern und vor Missbrauch zu schützen.</p>
+<p>Die Seite wird von ${OWNER.host} (${OWNER.hostCountry}) bereitgestellt. Beim Aufruf verarbeitet der Anbieter technisch notwendige Daten wie deine IP-Adresse, um die Seite auszuliefern und vor Missbrauch zu schützen. Diese Daten werden dabei in die USA übermittelt.</p>
 <h2>Deine Rechte</h2>
 <p>Du kannst jederzeit per E-Mail Auskunft über deine Daten verlangen oder ihrer Bearbeitung widersprechen.</p>`};
 function legal(k){cur=null;app.innerHTML=`${topbar('Datenschutz')}<article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
