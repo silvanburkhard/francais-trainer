@@ -729,8 +729,9 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'plan'},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box'},S.opt);
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
+if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
 function applyTheme(){const r=document.documentElement;S.opt.theme==='auto'?r.removeAttribute('data-theme'):r.dataset.theme=S.opt.theme}
 applyTheme();
@@ -894,7 +895,7 @@ function settings(){
   const methodHint=o.method==='box'?'Wie eine Karteibox mit 5 Fächern: Richtig → die Karte rückt ein Fach weiter, falsch → zurück in Fach 1. In Fach 5 gilt sie als gelernt.':'Die Seite plant für jede Aufgabe, wann du sie wiederholst. Nach jeder Antwort sagst du, wie schwer sie war.';
   app.innerHTML=`${topbar('Einstellungen')}<h1>Einstellungen</h1>
   <section class="section"><h2>Lernmethode</h2><div class="group">
-    <div class="setrow col"><div class="lbl"><b>So lernst du</b><span>${methodHint}</span></div>${seg('method',[['plan','Wiederholungsplan'],['box','Lernkartei']],o.method,'Lernmethode')}</div>
+    <div class="setrow col"><div class="lbl"><b>So lernst du</b><span>${methodHint}</span></div>${seg('method',[['box','Lernkartei'],['plan','Wiederholungsplan']],o.method,'Lernmethode')}</div>
   </div></section>
   <section class="section"><h2>Abfrage</h2><div class="group">
     <div class="setrow col"><div class="lbl"><b>Richtung bei Verben und Vokabeln</b><span>${dirHint}</span></div>${seg('dir',[['de','Deutsch → Französisch'],['fr','Französisch → Deutsch'],['mix','Gemischt']],S.dir,'Abfragerichtung')}</div>
