@@ -104,9 +104,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .flip{perspective:1400px;margin:0 0 20px;cursor:pointer;outline:none}
 .flip.on{cursor:default}
 .flip:focus-visible .face{outline:3px solid var(--text);outline-offset:3px}
-.flip-in{display:grid;transition:transform .25s ease-out;transform-style:preserve-3d}
+.flip-in{display:grid;grid-template-columns:minmax(0,1fr);transition:transform .25s ease-out;transform-style:preserve-3d}
 .flip.on .flip-in{transform:rotateY(180deg)}
-.face{grid-area:1/1;min-height:300px;display:flex;flex-direction:column;gap:8px;padding:20px 24px 24px;border:1.5px solid var(--text);background:var(--bg);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face{grid-area:1/1;min-width:0;min-height:300px;display:flex;flex-direction:column;gap:8px;padding:20px 24px 24px;border:1.5px solid var(--text);background:var(--bg);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .face>div{margin:auto 0}
 .face .word{margin:0}
 .face.back{transform:rotateY(180deg);background:var(--text);color:var(--bg)}
@@ -179,7 +179,7 @@ details summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px}
 .bar{height:4px;background:var(--line);overflow:hidden;margin-bottom:24px}
 .bar i{display:block;height:100%;background:var(--text);transition:width .3s}
 .tense{color:var(--muted);font-size:0.9375rem;font-weight:700}
-.word{font-size:clamp(2rem,8vw,3rem);font-weight:700;letter-spacing:-.02em;margin:8px 0 0;line-height:1.1}
+.word{font-size:clamp(2rem,8vw,3rem);font-weight:700;letter-spacing:-.02em;margin:8px 0 0;line-height:1.1;overflow-wrap:break-word;hyphens:auto}
 .word.q{font-size:1.625rem;letter-spacing:0;line-height:1.3}
 .gap{display:inline-block;min-width:60px;border-bottom:3px solid var(--text);text-align:center}
 .qhint{color:var(--muted);font-size:0.9375rem;margin-top:8px}
@@ -206,7 +206,7 @@ input.bad{background:var(--bad-bg);border-color:var(--bad)}
 .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:20px}
 .opts.wide{grid-template-columns:1fr}
 .opts.wide .opt{text-align:left;padding:10px 16px;font-size:1.0625rem}
-.opt{min-height:52px;border:1.5px solid var(--text);background:transparent;border-radius:0;font-size:1.125rem;font-weight:700}
+.opt{min-height:52px;padding:8px 12px;border:1.5px solid var(--text);background:transparent;border-radius:0;font-size:1.125rem;font-weight:700;overflow-wrap:anywhere;hyphens:auto}
 .opt:not(:disabled):hover{background:var(--text);color:var(--bg)}
 .opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .opt.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
@@ -611,16 +611,16 @@ ger:[
  {q:'___ au CMJ, on apprend beaucoup sur la politique.',h:'être',a:'en étant',w:'être → étant (Ausnahme): en étant.'},
  {q:'Tu vas réussir ___ régulièrement.',h:'travailler',a:'en travaillant',w:'en travaillant (indem du regelmässig arbeitest).'},
  {q:'Il s\'est endormi ___ la télé.',h:'regarder',a:'en regardant',w:'en regardant (während er fernsah).'},
- {q:'___ , les citoyens choisissent leur gouvernement.',h:'voter',a:'en votant',w:'en votant (indem sie wählen).'},
- {q:'Elle est partie ___ au revoir.',h:'ne pas dire',a:'en ne disant pas',w:'Verneinung: en ne disant pas (ohne Tschüss zu sagen).'},
+ {q:'___, les citoyens choisissent leur gouvernement.',h:'voter',a:'en votant',w:'en votant (indem sie wählen).'},
+ {q:'Il a fait une erreur ___ les consignes.',h:'ne pas lire',a:'en ne lisant pas',w:'Verneinung: en ne lisant pas (indem er die Anweisungen nicht las). «Ohne zu …» heisst dagegen sans + Infinitiv: sans lire.'},
  {q:'Il chante en prenant sa douche.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Gleichzeitigkeit',w:'Er singt, während er duscht.'},
  {q:'C\'est en travaillant qu\'on réussit.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Art und Weise',w:'Wie erreicht man Erfolg? Indem man arbeitet.'},
  {q:'En partant maintenant, tu arriveras à l\'heure.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Bedingung',w:'Wenn du jetzt gehst, kommst du pünktlich an.'},
  {q:'Elle lit le journal en buvant son café.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Gleichzeitigkeit',w:'Sie liest, während sie Kaffee trinkt.'},
  {q:'Il a appris l\'anglais en regardant des séries.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Art und Weise',w:'Wie hat er Englisch gelernt? Indem er Serien schaute.'},
- {q:'En prenant le bus, tu ne seras pas en retard.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Bedingung',w:'Wenn du den Bus nimmst, bist du nicht zu spät.'},
+ {q:'En prenant le bus, tu ne seras pas en retard.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Bedingung',w:'Wenn du den Bus nimmst, bist du nicht zu spät. Typisch: Hauptsatz im Futur.'},
  {q:'Les élèves ___ à la cantine paient cinq euros.',h:'= qui mangent',o:['mangeant','en mangeant'],a:'mangeant',w:'Es beschreibt die Schüler (ein Nomen) → Participe présent.'},
- {q:'Il lit ___ .',h:'= während er isst',o:['mangeant','en mangeant'],a:'en mangeant',w:'Es sagt, wann/wie er liest (bezieht sich aufs Verb) → Gérondif.'},
+ {q:'Il lit le journal ___ .',h:'= während er isst',o:['mangeant','en mangeant'],a:'en mangeant',w:'Es sagt, wann/wie er liest (bezieht sich aufs Verb) → Gérondif.'},
  {q:'Une femme ___ trois langues cherche du travail.',h:'= qui parle',o:['parlant','en parlant'],a:'parlant',w:'Beschreibt die Frau → Participe présent.'},
  {q:'On apprend une langue ___ beaucoup.',h:'= indem man viel spricht',o:['parlant','en parlant'],a:'en parlant',w:'Wie lernt man? → Gérondif.'},
 ],
@@ -697,7 +697,7 @@ pp:`<h3>Wozu?</h3>
 <li>Bei reflexiven Verben bleibt das Pronomen: s'engager → <b>s'engageant</b>.</li></ul>`,
 ger:`<h3>Bildung</h3>
 <p><b>en + Participe présent</b>: en parlant, en choisissant, en faisant, en étant.</p>
-<p>Verneinung: <b>en ne</b> parlant <b>pas</b>.</p>
+<p>Verneinung: <b>en ne</b> parlant <b>pas</b>. «Ohne zu …» heisst dagegen <b>sans</b> + Infinitiv: <i>sans parler</i>.</p>
 <div class="note">Beide Handlungen haben <b>dasselbe Subjekt</b>: <i>Il</i> écoute de la musique en <i>faisant</i> ses devoirs. (Er hört Musik, und er macht die Hausaufgaben.)</div>
 <h3>Was drückt es aus?</h3>
 <table><tr><th>Bedeutung</th><th>Deutsch</th><th>Beispiel</th></tr>
@@ -1088,7 +1088,7 @@ function render(){
     $('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;
     $('chk').onclick=()=>checkSingle();$('ans').focus();
   }else{ // item
-    const body=c.o?`<div class="opts">${c.o.map((o,i)=>`<button class="opt" data-o="${esc(o)}" lang="fr">${esc(o)}</button>`).join('')}</div>`
+    const body=c.o?`<div class="opts${c.o.some(o=>o.length>10)?' wide':''}">${c.o.map((o,i)=>`<button class="opt" data-o="${esc(o)}" lang="fr">${esc(o)}</button>`).join('')}</div>`
       :`<div class="answer card">${INPUT('ans','Deine Antwort')}<div id="fix"></div></div>`;
     app.innerHTML=frame(t,`<p class="word q" lang="fr">${gapify(c.q)}</p>${c.h?`<p class="qhint">${esc(c.h)}</p>`:''}`,body)+(c.o?'':ACC());
     if(c.o){app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>checkSingle(b.dataset.o));app.querySelector('.opt').focus()}
@@ -1273,7 +1273,7 @@ function renderChoice(){
   if(c.type==='item')prompt=`<p class="word q" lang="fr">${gapify(c.q)}</p>${c.h?`<p class="qhint">${esc(c.h)}</p>`:''}`;
   else if(dir==='fr')prompt=`<h1 class="word" lang="fr">${esc(c.fr)}</h1><p class="qhint">Was heisst das auf Deutsch?</p>`;
   else prompt=`<h1 class="word" lang="de">${esc(c.de)}</h1><p class="qhint">${c.type==='pair'?'Welche Ergänzung ist richtig?':'Was heisst das auf Französisch?'}</p>`;
-  const wide=ch.wide||ch.opts.some(o=>o.length>14);
+  const wide=ch.wide||ch.opts.some(o=>o.length>10);
   app.innerHTML=frame(lab,prompt,`<div class="opts${wide?' wide':''}">${ch.opts.map(o=>`<button class="opt" data-o="${esc(o)}" lang="${ch.lang||'fr'}">${esc(o)}</button>`).join('')}</div><div id="fix"></div>`);
   wire();
   app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>checkChoice(b.dataset.o));
