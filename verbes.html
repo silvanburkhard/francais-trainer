@@ -210,6 +210,10 @@ input.bad{background:var(--bad-bg);border-color:var(--bad)}
 .opt:not(:disabled):hover{background:var(--text);color:var(--bg)}
 .opt.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
 .opt.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.opt.sel{background:var(--text);color:var(--bg)}
+.prow{margin-top:16px}
+.prow .opts{margin-top:6px}
+#prepRows .opts{grid-template-columns:repeat(3,1fr)}
 .opt:disabled{cursor:default}
 .answer{margin-top:16px}
 .acc{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
@@ -765,7 +769,7 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type',algo:true},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full'},S.opt);
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
@@ -862,12 +866,12 @@ function boxStrip(ids,tid){
 function wireBoxes(){app.querySelectorAll('.boxbtn').forEach(b=>b.onclick=()=>start('due',b.dataset.tid||null,+b.dataset.box))}
 
 // Richtung und Antwortart direkt beim Lernen umstellen
-function quickOpts(){
-  return`<div class="quick"><div class="qrow"><span class="qlbl">Richtung</span>${seg('qdir',[['de','DE → FR'],['fr','FR → DE'],['mix','Gemischt']],S.dir,'Abfragerichtung')}</div>
+function quickOpts(extra){
+  return`<div class="quick">${extra||''}<div class="qrow"><span class="qlbl">Richtung</span>${seg('qdir',[['de','DE → FR'],['fr','FR → DE'],['mix','Gemischt']],S.dir,'Abfragerichtung')}</div>
   <div class="qrow"><span class="qlbl">Antworten</span>${seg('qans',[['type','Tippen'],['flip','Karte'],['choice','Auswahl']],S.opt.answer,'Antworten')}</div></div>`;
 }
-function wireQuick(rerender){app.querySelectorAll('input[name=qdir],input[name=qans]').forEach(r=>r.onchange=()=>{
-  if(r.name==='qdir')S.dir=r.value;else S.opt.answer=r.value;save();rerender();
+function wireQuick(rerender){app.querySelectorAll('input[name=qdir],input[name=qans],input[name=qcomp]').forEach(r=>r.onchange=()=>{
+  if(r.name==='qdir')S.dir=r.value;else if(r.name==='qcomp')S.opt.compMode=r.value;else S.opt.answer=r.value;save();rerender();
   const n=app.querySelector(`input[name=${r.name}]:checked`);n&&n.focus()})}
 
 // ===================== STARTSEITE =====================
@@ -927,7 +931,7 @@ function topicPage(tid){
   <section class="section"><h2>Fortschritt</h2><div class="card">${prog(ids,true)}${c.due?`<p class="duehint">${c.due} von ${c.total} ${DUEW()}.</p>`:nextDue(ids)}</div>${LEGEND()}</section>
   <section class="section"><h2>${BOX()?'Lernkartei':FREE()?'Üben':'Lernen'}</h2>
     ${BOX()?boxStrip(ids,tid).replace('<p class="hint">','<p class="hint" style="margin:0 0 16px">'):''}
-    ${quickOpts()}
+    ${quickOpts(tid==='comp'?`<div class="qrow"><span class="qlbl">Abfrage</span>${seg('qcomp',[['full','Ganzer Ausdruck'],['prep','Nur Präposition']],S.opt.compMode,'Abfrage')}</div>`:'')}
     ${FREE()?`<button class="btn primary" id="all" ${c.total?'':'disabled'}>Alle ${c.total} Karten üben</button>
     <button class="btn" id="learn" ${c.learn?'':'disabled'}>Nicht gewusste üben (${c.learn})</button>`
     :`<button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND(),c.due)} Karten)`:`Fällige lernen (${Math.min(ROUND(),c.due)} von ${c.due})`}</button>
@@ -1061,6 +1065,7 @@ const ACC=()=>!S.opt.accBar?'':`<div class="acc" aria-label="Akzente">${'é è �
 const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
 
 function render(){
+  if(cur.c.type==='pair'&&S.opt.compMode==='prep'&&!S.session.exam)return renderPrep();
   if(S.opt.answer==='flip'&&!S.session.exam)return renderFlip();
   if(S.opt.answer==='choice'&&!S.session.exam&&cur.c.type!=='verb')return renderChoice();
   const {c,dir}=cur,t=TOP[c.topic].title;
@@ -1136,6 +1141,58 @@ function leaveTo(t){
   cur=null;const ok=t&&TOP[t];
   try{history.replaceState(null,'',ok?'#t-'+t:location.pathname+location.search)}catch(e){}
   ok?topicPage(t):home();scrollTo(0,0);
+}
+// ----- Compléments: nur die Präposition abfragen -----
+// Lücken dort, wo à / de / d' steht; ohne Präposition eine Lücke vor qn/qc/faire mit Antwort «—»
+function prepSlots(fr){
+  const t=fr.split(' '),ans=[],parts=t.map(w=>/^(à|de|d')$/.test(w)?(ans.push(w),null):w);
+  if(!ans.length){const i=t.findIndex(w=>/^(qn|qc|qn\/qc|faire)$/.test(w));ans.push('—');parts.splice(i<0?t.length:i,0,null)}
+  return{parts,ans};
+}
+function prepHtml(p,fill){let k=0;return p.parts.map(w=>w===null?(fill?fill(k++):(k++,'<span class="gap">&nbsp;</span>')):esc(w)).join(' ')}
+const NONE=['','-','—','–','x','0','/','ø','keine','kein','keins','nichts'];
+function renderPrep(){
+  const {c}=cur,t=TOP[c.topic].title,p=cur.prep=prepSlots(c.fr),mode=S.opt.answer,n=p.ans.length;
+  cur.phase='ask';
+  const prompt=`<p class="qhint" lang="de" style="margin-top:4px">${esc(c.de)}</p><p class="word q" lang="fr" id="pq">${prepHtml(p)}</p>`;
+  if(mode==='flip'){
+    cur.flip=true;
+    app.innerHTML=frame(`${t} · Nur Präposition`,'',`<div class="flip" id="flip" role="button" tabindex="0" aria-label="Karte umdrehen"><div class="flip-in">
+      <div class="face front"><span class="side">Welche Präposition?</span><div>${prompt}</div><span class="turn">Tippen oder Leertaste zum Umdrehen</span></div>
+      <div class="face back" aria-hidden="true"><span class="side">Lösung</span><div><p class="word q" lang="fr">${prepHtml(p,k=>`<b class="fill">${esc(p.ans[k])}</b>`)}</p><p class="qhint">${esc(c.de)}</p></div><span class="turn"></span></div></div></div>`);
+    wire();$('actions').innerHTML=`<button class="btn primary" id="turn">Umdrehen</button>`;
+    $('flip').onclick=flipCard;$('turn').onclick=flipCard;$('flip').focus();return;
+  }
+  const body=mode==='choice'
+    ?`<div id="prepRows">${p.ans.map((_,k)=>`<div class="prow">${n>1?`<span class="qlbl">${k+1}. Lücke</span>`:''}<div class="opts" data-k="${k}">${['—','à','de'].map(o=>`<button class="opt" data-o="${o}" lang="fr">${o==='—'?'— keine':o}</button>`).join('')}</div></div>`).join('')}</div>`
+    :`<div class="answer card">${p.ans.map((_,k)=>`<div class="line"><label class="pr" for="pg${k}">${n>1?`${k+1}. Lücke`:'Präposition'}</label>${INPUT('pg'+k,'à, de oder leer',k<n-1?'next':'done')}</div>`).join('')}<p class="hint">Leer lassen oder «–» schreiben, wenn keine Präposition hingehört.</p></div>`;
+  app.innerHTML=frame(`${t} · Nur Präposition`,prompt,body)+(mode==='choice'?'':ACC());
+  wire();
+  if(mode==='choice'){
+    cur.picks=[];
+    app.querySelectorAll('#prepRows .opts').forEach(g=>g.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(cur.phase!=='ask')return;const k=+g.dataset.k;cur.picks[k]=b.dataset.o;
+      g.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));
+      if(p.ans.every((_,i)=>cur.picks[i]!==undefined))checkPrep(cur.picks)}));
+    app.querySelector('.opt').focus();
+  }else{
+    const vals=()=>p.ans.map((_,k)=>$('pg'+k).value);
+    $('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;$('chk').onclick=()=>checkPrep(vals());
+    p.ans.forEach((_,k)=>$('pg'+k).onkeydown=e=>{if(e.key!=='Enter'||cur.phase!=='ask')return;e.preventDefault();e.stopPropagation();const nx=$('pg'+(k+1));nx?nx.focus():checkPrep(vals())});
+    $('pg0').focus();
+  }
+}
+function checkPrep(vals){
+  if(cur.phase!=='ask')return;
+  const {c}=cur,p=cur.prep;
+  const res=p.ans.map((a,k)=>{const v=norm(vals[k]||'');return a==='—'?(NONE.includes(v)?0:1):judgeList(v,[a])});
+  const err=res.reduce((x,y)=>x+y,0),cls=x=>x===0?'ok':x<1?'warn':'bad';
+  cur.errors=err;cur.phase='checked';
+  $('pq').innerHTML=prepHtml(p,k=>`<b class="fill res ${cls(res[k])}">${esc(p.ans[k])}</b>`);
+  if(S.opt.answer==='choice')app.querySelectorAll('#prepRows .opts').forEach(g=>{const k=+g.dataset.k;g.querySelectorAll('.opt').forEach(b=>{b.disabled=true;b.classList.remove('sel');if(b.dataset.o===p.ans[k])b.classList.add('ok');else if(b.dataset.o===cur.picks[k])b.classList.add('bad')})});
+  else p.ans.forEach((_,k)=>{const i=$('pg'+k);i.readOnly=true;i.className=cls(res[k])});
+  const msg=err===0?'✓ Richtig':err<1?'~ Fast: Akzent beachten':'✗ Falsch';
+  showGrades(err<1?2:0,`<span class="res ${cls(err)}">${msg}</span>`,`<b lang="fr">${esc(c.fr)}</b> – ${esc(c.de)}`);
 }
 // ----- Auswählen statt Eintippen -----
 const REL_OPTS=['qui','que','où','dont','ce qui','ce que','lequel','laquelle','lesquels','lesquelles','auquel','auxquels','auxquelles','duquel'];
