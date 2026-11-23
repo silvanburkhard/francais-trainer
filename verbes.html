@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Verbes – Konjugationstrainer</title>
+<title>Français – Dossier 5 Trainer</title>
 <style>
 :root{
   --bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;
@@ -17,8 +17,8 @@
   --ok:#4cc26a;--ok-bg:#12301b;--warn:#f0b04a;--warn-bg:#33260f;--bad:#ff6b5e;--bad-bg:#3a1512;
 }}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:17px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:600px;margin:0 auto;padding:24px 16px 120px}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:640px;margin:0 auto;padding:24px 16px 120px}
 h1{font-size:34px;line-height:1.1;margin:8px 0 4px;letter-spacing:-.02em}
 h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:28px 4px 8px}
 .sub{color:var(--muted);margin:0 0 20px}
@@ -28,10 +28,10 @@ h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
 .stat b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
 .stat span{color:var(--muted);font-size:15px}
 button{font:inherit;color:inherit;cursor:pointer}
-.btn{display:block;width:100%;min-height:50px;border:0;border-radius:12px;font-weight:600;padding:12px 16px;margin-bottom:8px;background:var(--accent-soft);color:var(--accent)}
+.btn{display:block;width:100%;min-height:50px;border:0;border-radius:12px;font-weight:600;padding:12px 16px;margin-bottom:8px;background:var(--accent-soft);color:var(--accent);text-align:center;text-decoration:none}
 .btn.primary{background:var(--accent);color:var(--on-accent)}
 .btn:disabled{opacity:.45;cursor:default}
-.btn:focus-visible,.chip:focus-visible,.seg label:focus-within,input:focus-visible,.link:focus-visible,.acc button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,.chip:focus-visible,.seg label:focus-within,input:focus-visible,.link:focus-visible,.acc button:focus-visible,.opt:focus-visible,.topic a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .hint{color:var(--muted);font-size:15px;margin:4px 4px 0}
 .seg{display:flex;background:var(--line);border-radius:10px;padding:2px}
 .seg label{flex:1;text-align:center;padding:9px 4px;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;min-height:40px}
@@ -43,43 +43,73 @@ button{font:inherit;color:inherit;cursor:pointer}
 .chip .st{margin-right:6px;font-size:12px}
 .row-head{display:flex;justify-content:space-between;align-items:center;margin:28px 4px 8px}
 .row-head h2{margin:0}
-.link{border:0;background:none;color:var(--accent);font-weight:500;padding:8px 4px;min-height:40px}
+.link{border:0;background:none;color:var(--accent);font-weight:500;padding:8px 4px;min-height:40px;text-decoration:none;display:inline-block}
 .legend{color:var(--muted);font-size:14px;margin:10px 4px 0}
+/* topics */
+.topic{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px 12px 12px 16px;margin-bottom:8px}
+.topic a.name{flex:1;min-width:0;color:inherit;text-decoration:none;padding:4px 0}
+.topic .name b{display:block;font-size:17px}
+.topic .name span{color:var(--muted);font-size:14px}
+.topic .meter{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.topic .meter i{display:block;height:100%;background:var(--accent)}
+.topic .btn{width:auto;min-height:44px;margin:0;padding:8px 14px;font-size:15px}
+/* explanations */
+.ex h3{font-size:19px;margin:22px 0 8px}
+.ex h3:first-child{margin-top:0}
+.ex p,.ex li{margin:0 0 8px}
+.ex ul{padding-left:20px;margin:0 0 8px}
+.ex table{border-collapse:collapse;width:100%;font-size:15px;margin:4px 0 12px;overflow-wrap:anywhere}
+.ex th,.ex td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.ex th{font-size:13px;color:var(--muted);font-weight:600}
+.ex .note{background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:8px 0 12px}
+.ex b.k{color:var(--accent)}
+details{border-bottom:1px solid var(--line);padding:6px 0}
+details summary{cursor:pointer;font-weight:600;padding:8px 0;min-height:40px}
 /* drill */
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .count{color:var(--muted);font-variant-numeric:tabular-nums}
 .bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:20px}
 .bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
 .tense{color:var(--muted);font-size:15px}
-.word{font-size:40px;font-weight:700;letter-spacing:-.02em;margin:4px 0 0}
+.word{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:4px 0 0;line-height:1.2}
+.word.q{font-size:24px;font-weight:600;letter-spacing:0}
+.gap{display:inline-block;min-width:60px;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center}
+.qhint{color:var(--muted);font-size:15px;margin-top:6px}
 .line{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
 .line:first-child{border-top:0}
 .pr{width:84px;flex:none;color:var(--muted);text-align:right}
 .weak .pr::after{content:" •";color:var(--warn)}
-input[type=text]{flex:1;min-width:0;font:inherit;font-size:19px;color:var(--text);background:var(--bg);border:1.5px solid transparent;border-radius:10px;padding:10px 12px;min-height:46px}
+input[type=text]{flex:1;min-width:0;width:100%;font:inherit;font-size:19px;color:var(--text);background:var(--bg);border:1.5px solid transparent;border-radius:10px;padding:10px 12px;min-height:46px}
 input.ok{background:var(--ok-bg);border-color:var(--ok)}
 input.warn{background:var(--warn-bg);border-color:var(--warn)}
 input.bad{background:var(--bad-bg);border-color:var(--bad)}
 .mark{width:22px;flex:none;font-weight:700;text-align:center}
 .fix{font-size:15px;margin:-2px 0 6px 96px}
-.fix.warn{color:var(--warn)}.fix.bad{color:var(--bad)}
+.fix.warn,.res.warn{color:var(--warn)}.fix.bad,.res.bad{color:var(--bad)}.res.ok{color:var(--ok)}
 .weaknote{font-size:14px;color:var(--muted);margin:8px 0 0}
 .inf{display:flex;gap:8px;margin-top:16px}
 .inf .btn{width:auto;margin:0}
 .result{font-weight:600;margin:4px 4px 10px}
+.why{background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:16px}
 .grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .grades .btn{margin:0;padding:8px 4px;font-size:15px}
 .grades small{display:block;font-weight:400;opacity:.8;font-size:12px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:16px}
+.opt{min-height:48px;border:1.5px solid var(--line);background:var(--bg);border-radius:10px;font-size:18px;font-weight:500}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.answer{margin-top:16px}
 .acc{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
 .acc button{min-width:44px;min-height:44px;border:0;border-radius:10px;background:var(--bg);font-size:19px}
 .danger{color:var(--bad)}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
-footer{max-width:600px;margin:0 auto;padding:0 16px 140px;color:var(--muted);font-size:15px;display:flex;gap:20px}
+.big{font-size:56px;font-weight:700;margin:0}
+footer{max-width:640px;margin:0 auto;padding:0 16px 140px;color:var(--muted);font-size:15px;display:flex;gap:20px}
 footer a,.legal a{color:var(--accent)}
 .legal h2{text-transform:none;letter-spacing:0;font-size:20px;color:var(--text);margin:28px 0 8px}
-.legal p,.legal li{margin:0 0 10px}
-.legal ul{padding-left:20px}
+.legal p{margin:0 0 10px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 </head>
 <body>
@@ -94,239 +124,834 @@ const OWNER={
   hostCountry:'[Land des Servers, z. B. Schweiz]',
 };
 // ============================================
-const RAW=`regarder|anschauen|regarde,regardes,regarde,regardons,regardez,regardent
-acheter|kaufen|achète,achètes,achète,achetons,achetez,achètent
-préférer|bevorzugen, lieber mögen|préfère,préfères,préfère,préférons,préférez,préfèrent
-appeler|rufen, anrufen|appelle,appelles,appelle,appelons,appelez,appellent
-essayer|versuchen|essaie/essaye,essaies/essayes,essaie/essaye,essayons,essayez,essaient/essayent
-commencer|anfangen|commence,commences,commence,commençons,commencez,commencent
-répondre|antworten|réponds,réponds,répond,répondons,répondez,répondent
-dormir|schlafen|dors,dors,dort,dormons,dormez,dorment
-choisir|wählen|choisis,choisis,choisit,choisissons,choisissez,choisissent
-craindre|fürchten|crains,crains,craint,craignons,craignez,craignent
-aller|gehen|vais,vas,va,allons,allez,vont
-avoir|haben|ai,as,a,avons,avez,ont
-battre|schlagen|bats,bats,bat,battons,battez,battent
-boire|trinken|bois,bois,boit,buvons,buvez,boivent
-connaître|kennen (Person, Ort)|connais,connais,connaît/connait,connaissons,connaissez,connaissent
-détruire|zerstören|détruis,détruis,détruit,détruisons,détruisez,détruisent
-convaincre|überzeugen|convaincs,convaincs,convainc,convainquons,convainquez,convainquent
-courir|rennen|cours,cours,court,courons,courez,courent
-croire|glauben|crois,crois,croit,croyons,croyez,croient
-devoir|müssen|dois,dois,doit,devons,devez,doivent
-dire|sagen|dis,dis,dit,disons,dites,disent
-écrire|schreiben|écris,écris,écrit,écrivons,écrivez,écrivent
-envoyer|schicken|envoie,envoies,envoie,envoyons,envoyez,envoient
-être|sein|suis,es,est,sommes,êtes,sont
-faire|machen|fais,fais,fait,faisons,faites,font
-falloir|nötig sein (il … = man muss)|faut
-fuir|fliehen|fuis,fuis,fuit,fuyons,fuyez,fuient
-lire|lesen|lis,lis,lit,lisons,lisez,lisent
-mettre|legen, stellen, setzen|mets,mets,met,mettons,mettez,mettent
-mourir|sterben|meurs,meurs,meurt,mourons,mourez,meurent
-offrir|schenken, anbieten|offre,offres,offre,offrons,offrez,offrent
-plaire|gefallen|plais,plais,plaît/plait,plaisons,plaisez,plaisent
-pleuvoir|regnen|pleut
-pouvoir|können (dürfen)|peux,peux,peut,pouvons,pouvez,peuvent
-prendre|nehmen|prends,prends,prend,prenons,prenez,prennent
-recevoir|bekommen, erhalten|reçois,reçois,reçoit,recevons,recevez,reçoivent
-rire|lachen|ris,ris,rit,rions,riez,rient
-savoir|wissen|sais,sais,sait,savons,savez,savent
-suffire|genügen|suffis,suffis,suffit,suffisons,suffisez,suffisent
-suivre|folgen|suis,suis,suit,suivons,suivez,suivent
-se taire|schweigen|me tais,te tais,se tait,nous taisons,vous taisez,se taisent
-venir|kommen|viens,viens,vient,venons,venez,viennent
-vivre|leben|vis,vis,vit,vivons,vivez,vivent
-voir|sehen|vois,vois,voit,voyons,voyez,voient
-vouloir|wollen|veux,veux,veut,voulons,voulez,veulent
-se souvenir|sich erinnern|me souviens,te souviens,se souvient,nous souvenons,vous souvenez,se souviennent
-devenir|werden|deviens,deviens,devient,devenons,devenez,deviennent`;
-const VERBS=RAW.split('\n').map(l=>{const[fr,de,f]=l.split('|');return{fr,de,forms:f.split(',')}});
+
+// ===================== DATEN =====================
+// Verben: fr | de | Formen | konjugiert wie
+const VERB_RAW=`regarder|anschauen|regarde,regardes,regarde,regardons,regardez,regardent|
+acheter|kaufen|achète,achètes,achète,achetons,achetez,achètent|
+préférer|bevorzugen, lieber mögen|préfère,préfères,préfère,préférons,préférez,préfèrent|
+appeler|rufen, anrufen|appelle,appelles,appelle,appelons,appelez,appellent|
+essayer|versuchen|essaie/essaye,essaies/essayes,essaie/essaye,essayons,essayez,essaient/essayent|
+commencer|anfangen|commence,commences,commence,commençons,commencez,commencent|
+répondre|antworten|réponds,réponds,répond,répondons,répondez,répondent|
+dormir|schlafen|dors,dors,dort,dormons,dormez,dorment|
+choisir|wählen|choisis,choisis,choisit,choisissons,choisissez,choisissent|
+craindre|fürchten|crains,crains,craint,craignons,craignez,craignent|
+aller|gehen|vais,vas,va,allons,allez,vont|
+avoir|haben|ai,as,a,avons,avez,ont|
+battre|schlagen|bats,bats,bat,battons,battez,battent|
+boire|trinken|bois,bois,boit,buvons,buvez,boivent|
+connaître|kennen (Person, Ort)|connais,connais,connaît/connait,connaissons,connaissez,connaissent|
+détruire|zerstören|détruis,détruis,détruit,détruisons,détruisez,détruisent|réduire
+convaincre|überzeugen|convaincs,convaincs,convainc,convainquons,convainquez,convainquent|
+courir|rennen|cours,cours,court,courons,courez,courent|
+croire|glauben|crois,crois,croit,croyons,croyez,croient|
+devoir|müssen|dois,dois,doit,devons,devez,doivent|
+dire|sagen|dis,dis,dit,disons,dites,disent|
+écrire|schreiben|écris,écris,écrit,écrivons,écrivez,écrivent|
+envoyer|schicken|envoie,envoies,envoie,envoyons,envoyez,envoient|
+être|sein|suis,es,est,sommes,êtes,sont|
+faire|machen|fais,fais,fait,faisons,faites,font|
+falloir|nötig sein (il … = man muss)|faut|
+fuir|fliehen|fuis,fuis,fuit,fuyons,fuyez,fuient|
+lire|lesen|lis,lis,lit,lisons,lisez,lisent|
+mettre|legen, stellen, setzen|mets,mets,met,mettons,mettez,mettent|
+mourir|sterben|meurs,meurs,meurt,mourons,mourez,meurent|
+offrir|schenken, anbieten|offre,offres,offre,offrons,offrez,offrent|
+plaire|gefallen|plais,plais,plaît/plait,plaisons,plaisez,plaisent|
+pleuvoir|regnen|pleut|
+pouvoir|können (dürfen)|peux,peux,peut,pouvons,pouvez,peuvent|
+prendre|nehmen|prends,prends,prend,prenons,prenez,prennent|
+recevoir|bekommen (z. B. einen Brief)|reçois,reçois,reçoit,recevons,recevez,reçoivent|
+rire|lachen|ris,ris,rit,rions,riez,rient|
+savoir|wissen|sais,sais,sait,savons,savez,savent|
+suffire|genügen|suffis,suffis,suffit,suffisons,suffisez,suffisent|
+suivre|folgen|suis,suis,suit,suivons,suivez,suivent|
+se taire|schweigen|me tais,te tais,se tait,nous taisons,vous taisez,se taisent|
+venir|kommen|viens,viens,vient,venons,venez,viennent|
+vivre|leben|vis,vis,vit,vivons,vivez,vivent|
+voir|sehen|vois,vois,voit,voyons,voyez,voient|
+vouloir|wollen|veux,veux,veut,voulons,voulez,veulent|
+se souvenir|sich erinnern|me souviens,te souviens,se souvient,nous souvenons,vous souvenez,se souviennent|venir
+devenir|werden|deviens,deviens,devient,devenons,devenez,deviennent|venir
+obtenir|erhalten, erreichen (z. B. ein Diplom)|obtiens,obtiens,obtient,obtenons,obtenez,obtiennent|venir
+s'abstenir|sich der Stimme enthalten|m'abstiens,t'abstiens,s'abstient,nous abstenons,vous abstenez,s'abstiennent|obtenir
+tenir|halten|tiens,tiens,tient,tenons,tenez,tiennent|venir
+réduire|verringern, reduzieren|réduis,réduis,réduit,réduisons,réduisez,réduisent|
+construire|bauen|construis,construis,construit,construisons,construisez,construisent|réduire
+s'éteindre|ausgehen (Licht)|m'éteins,t'éteins,s'éteint,nous éteignons,vous éteignez,s'éteignent|craindre
+définir|definieren, bestimmen|définis,définis,définit,définissons,définissez,définissent|choisir
+réunir|versammeln, zusammenbringen|réunis,réunis,réunit,réunissons,réunissez,réunissent|choisir`;
+
+// Vokabeln Dossier 5: fr (Alternativen mit " ; ") | de
+const VOCAB_RAW=`la politique|die Politik
+l'engagement (m.)|das Engagement
+politique|politisch
+une décision|eine Entscheidung
+le quotidien|der Alltag
+une preuve|ein Beweis; ein Nachweis
+un bol|eine Schale; eine Trinkschale
+influencer qn/qc|jdn./etw. beeinflussen
+dès|von … an; ab (zeitlich)
+un gouvernement|eine Regierung
+une réforme|eine Reform
+futur/future|zukünftig; künftig
+végétarien/végétarienne|vegetarisch
+un détour|ein Umweg
+une épicerie|ein (kleines) Lebensmittelgeschäft
+un emballage|eine Verpackung
+des céréales (f., pl.)|Müsli
+risquer de faire qc|Gefahr laufen, etw. zu tun
+provoquer qc|etw. verursachen
+installer qc|etw. aufstellen; etw. installieren
+le Conseil municipal des jeunes (CMJ) ; le CMJ|der Jugendrat; das Jugendparlament
+un casque|ein Sturzhelm; ein Schutzhelm
+s'éteindre|ausgehen (Licht)
+réduire qc|etw. verringern; reduzieren
+la pollution|die Umweltverschmutzung
+tranquille|ruhig
+une proposition|ein Vorschlag
+une loi|ein Gesetz
+un député/une députée|ein Abgeordneter/eine Abgeordnete (im Parlament)
+une commune|eine Gemeinde; eine Kommune
+central/centrale|zentral
+un État ; un Etat|ein Staat
+une élection|eine Wahl (z. B. Präsidentschaftswahl)
+présidentiel/présidentielle|Präsidentschafts-; Präsidial-
+un citoyen/une citoyenne|ein (Staats)Bürger/eine (Staats)Bürgerin
+majeur/majeure|volljährig
+une liste électorale|eine Wählerliste
+obtenir qc|etw. erhalten, erreichen (z. B. ein Diplom)
+la majorité absolue|die absolute Mehrheit
+un tour|ein Wahlgang
+une fonction|eine Funktion
+nommer qn|jdn. ernennen
+le Premier ministre/la Première ministre|der Premierminister/die Premierministerin
+former qc|etw. formen; etw. bilden
+un projet de loi|ein Gesetzesentwurf
+le Parlement|das Parlament
+l'Assemblée nationale (f.)|die Nationalversammlung (frz. Parlament)
+le Sénat|der Senat
+valide|gültig
+le chef des armées|der Oberbefehlshaber über die Streitkräfte
+le pouvoir|die Macht
+en cas de qc|im Falle von etw.
+une menace|eine Drohung; eine Bedrohung
+un système|ein System
+définir qc|etw. bestimmen; etw. definieren
+une constitution|eine Verfassung
+veiller à qc|auf etw. achten
+le respect|der Respekt; die Einhaltung
+dissoudre qc|etw. auflösen
+un référendum|eine Volksabstimmung
+l'abstention (f.)|die Stimmenthaltung
+un devoir|eine Pflicht
+un électeur/une électrice|ein Wähler/eine Wählerin
+s'informer sur qc|sich über etw. informieren
+le mien/la mienne/les miens/les miennes|meiner/meine/meines (Possessivpronomen)
+engagé/engagée|engagiert
+un point de vue|ein Standpunkt; eine Ansicht
+sembler faire qc|etw. zu tun scheinen
+s'abstenir|sich der Stimme enthalten
+avoir du mal à faire qc|Mühe haben, etw. zu tun
+un résultat|ein Ergebnis
+se mobiliser pour/contre qc|sich für/gegen etw. mobilisieren
+soulagé/soulagée|erleichtert
+un vote|eine Stimme; eine Wahl (das Abstimmen)
+un cas|ein Fall
+un homme politique/une femme politique|ein Politiker/eine Politikerin
+tenir qc|etw. halten
+une promesse|ein Versprechen
+un élu/une élue|ein gewählter Politiker/eine gewählte Politikerin
+puisque|da (ja)
+de toute façon|auf jeden Fall; ohnehin; sowieso
+une vision|eine Sicht; eine Auffassung
+au lieu de|(an)statt
+avoir le sentiment de faire qc|das Gefühl haben, etw. zu tun
+un parti|eine Partei
+objectif/objective|objektiv
+attaquer qn/qc|jdn./etw. angreifen
+convaincre qn de qc|jdn. von etw. überzeugen
+lorsque|wenn; als
+un conseiller/une conseillère|ein Berater/eine Beraterin
+réunir qn|jdn. versammeln; zusammenbringen
+public/publique|öffentlich
+privé/privée|privat
+faire avancer qc|etw. vorantreiben
+concerner qn/qc|jdn./etw. betreffen
+une commission|eine Kommission
+construire qc|etw. bauen
+l'organisation (f.)|die Gestaltung; die Organisation
+voir le jour|geboren werden; realisiert werden
+une lutte|ein Kampf
+l'éducation (f.)|die Erziehung; die Bildung
+l'enthousiasme (m.)|die Begeisterung; der Enthusiasmus`;
+
+// Compléments du verbe (Cahier S. 59/60): Gruppe | fr | de
+const PAIR_GROUPS=[
+ ['1a','Französisch mit à – Deutsch direkt (Akkusativ)','Hier steht im Französischen à, obwohl man im Deutschen «jdn.» sagt.'],
+ ['1b','Französisch direkt – Deutsch indirekt (Dativ)','Hier steht im Französischen kein à, obwohl man im Deutschen «jdm.» sagt.'],
+ ['2','Verben mit de-Objekt',''],
+ ['3','Verben mit à-Objekt',''],
+ ['4','Verben mit direktem Objekt und à-Objekt','Die Sache ist direkt, die Person bekommt à: donner qc à qn.'],
+ ['5','Infinitiv ohne Präposition','Nach diesen Verben folgt der Infinitiv direkt: j\'espère gagner.'],
+ ['6','Infinitiv mit à',''],
+ ['7','Infinitiv mit de','Vor Vokal wird de zu d\': j\'essaie d\'arriver.'],
+];
+const PAIR_RAW=`1a|demander à qn|jdn. fragen / bitten
+1a|mentir à qn|jdn. belügen / anlügen
+1a|téléphoner à qn|jdn. anrufen
+1a|rendre visite à qn|jdn. besuchen
+1a|penser à qn/qc|an jdn./etw. denken
+1b|aider qn|jdm. helfen
+1b|croire qn|jdm. glauben
+1b|écouter qn|jdm. zuhören
+1b|remercier qn|jdm. danken
+1b|suivre qn|jdm. folgen
+2|discuter de qc|über etw. diskutieren
+2|dépendre de qn/qc|von jdm./etw. abhängen
+2|se moquer de qn/qc|sich über jdn./etw. lustig machen
+2|mourir de qc|an etw. sterben
+2|s'occuper de qn/qc|sich um jdn./etw. kümmern
+2|se plaindre de qn/qc|sich über jdn./etw. beklagen
+2|parler de qn/qc|über jdn./etw. sprechen
+2|profiter de qn/qc|von jdm./etw. profitieren
+2|rêver de qn/qc|von jdm./etw. träumen
+2|se souvenir de qn/qc|sich an jdn./etw. erinnern
+3|appartenir à qn/qc|zu etw./jdm. gehören
+3|s'habituer à qn/qc|sich an jdn./etw. gewöhnen
+3|s'intégrer à qc|sich in etw. eingliedern
+3|s'intéresser à qn/qc|sich für jdn./etw. interessieren
+3|parler à qn|mit jdm. sprechen
+3|répondre à qn|jdm. antworten
+3|servir à qc|zu etw. dienen / nützen
+4|adapter qc à qc|etw. an etw. anpassen
+4|apporter qc à qn|jdm. etw. bringen
+4|demander qc à qn|jdn. (nach) etw. fragen
+4|dire qc à qn|jdm. etw. sagen
+4|donner qc à qn|jdm. etw. geben
+4|écrire qc à qn|jdm. etw. schreiben
+4|expliquer qc à qn|jdm. etw. erklären
+4|envoyer qc à qn|jdm. etw. schicken
+4|inviter qn à qc|jdn. zu etw. einladen
+4|montrer qc à qn|jdm. etw. zeigen
+4|présenter qn à qn|jdm. jdn. vorstellen
+4|permettre qc à qn|jdm. etw. erlauben
+4|promettre qc à qn|jdm. etw. versprechen
+4|proposer qc à qn|jdm. etw. vorschlagen
+4|raconter qc à qn|jdm. etw. erzählen
+4|recommander qc à qn|jdm. etw. empfehlen
+4|relier qc à qc|etw. mit etw. verbinden
+4|offrir qc à qn|jdm. etw. anbieten
+4|vendre qc à qn|jdm. etw. verkaufen
+4|voler qc à qn|jdm. etw. stehlen
+5|adorer faire qc|etw. sehr gern tun
+5|aimer faire qc|etw. gern tun
+5|aller faire qc|etw. tun werden
+5|détester faire qc|etw. überhaupt nicht gern tun
+5|devoir faire qc|etw. tun müssen
+5|désirer faire qc|wünschen, etw. zu tun
+5|espérer faire qc|hoffen, etw. zu tun
+5|pouvoir faire qc|etw. tun können
+5|préférer faire qc|etw. lieber tun
+5|savoir faire qc|etw. tun können (wissen, wie)
+5|vouloir faire qc|etw. tun wollen
+5|falloir faire qc|etw. tun müssen (unpersönlich: il …)
+6|aider qn à faire qc|jdm. helfen, etw. zu tun
+6|avoir du mal à faire qc|Mühe haben, etw. zu tun
+6|apprendre à faire qc|lernen, etw. zu tun
+6|s'amuser à faire qc|Spass haben, etw. zu tun
+6|commencer à faire qc|beginnen, etw. zu tun
+6|continuer à faire qc|fortfahren, etw. zu tun
+6|encourager qn à faire qc|jdn. ermutigen, etw. zu tun
+6|hésiter à faire qc|zögern, etw. zu tun
+6|inviter qn à faire qc|jdn. einladen, etw. zu tun
+6|obliger qn à faire qc|jdn. verpflichten, etw. zu tun
+6|réussir à faire qc|gelingen, etw. zu tun
+6|servir à faire qc|dazu dienen, etw. zu tun
+7|arrêter de faire qc|aufhören, etw. zu tun
+7|avoir envie de faire qc|Lust haben, etw. zu tun
+7|avoir le droit de faire qc|das Recht haben, etw. zu tun
+7|demander à qn de faire qc|jdn. bitten, etw. zu tun
+7|décider de faire qc|entscheiden, etw. zu tun
+7|se dépêcher de faire qc|sich beeilen, etw. zu tun
+7|dire à qn de faire qc|jdm. sagen, etw. zu tun
+7|empêcher qn de faire qc|jdn. hindern, etw. zu tun
+7|être en train de faire qc|gerade etw. tun
+7|essayer de faire qc|versuchen, etw. zu tun
+7|faire semblant de faire qc|so tun, als ob
+7|s'occuper de faire qc|sich damit beschäftigen, etw. zu tun
+7|oublier de faire qc|vergessen, etw. zu tun
+7|permettre à qn de faire qc|jdm. erlauben, etw. zu tun
+7|promettre à qn de faire qc|jdm. versprechen, etw. zu tun
+7|proposer à qn de faire qc|jdm. vorschlagen, etw. zu tun
+7|reprocher à qn de faire qc|jdm. vorwerfen, etw. zu tun
+7|rêver de faire qc|davon träumen, etw. zu tun
+7|risquer de faire qc|Gefahr laufen, etw. zu tun
+7|venir de faire qc|etw. gerade getan haben`;
+
+// Übungsaufgaben: q (___ = Lücke), a (richtige Antwort[en]), w (Erklärung), o (Auswahl), h (Hinweis), half (zählt halb)
+const PREP=['—','à','au','aux','de','d\'','du','des'];
+const ITEMS={
+comp:[
+ {q:'Il téléphone ___ sa grand-mère.',a:'à',w:'téléphoner à qn – im Deutschen «jdn. anrufen», im Französischen mit à.'},
+ {q:'J\'aide ___ mon petit frère.',a:'—',w:'aider qn – direkt, ohne à (deutsch: jdm. helfen).'},
+ {q:'Je remercie ___ mes parents.',a:'—',w:'remercier qn – direkt (deutsch: jdm. danken).'},
+ {q:'Tu crois ___ ce politicien ?',a:'—',w:'croire qn – direkt (deutsch: jdm. glauben).'},
+ {q:'Nous écoutons ___ nos amis.',a:'—',w:'écouter qn – direkt (deutsch: jdm. zuhören).'},
+ {q:'Il ment ___ ses parents.',a:'à',w:'mentir à qn – mit à (deutsch: jdn. anlügen).'},
+ {q:'On rend visite ___ grands-parents.',a:'aux',half:['à'],w:'rendre visite à qn; à + les = aux.'},
+ {q:'Je pense souvent ___ vacances.',a:'aux',half:['à'],w:'penser à qc; à + les = aux.'},
+ {q:'Les députés discutent ___ la réforme.',a:'de',w:'discuter de qc.'},
+ {q:'Tout dépend ___ résultat.',a:'du',half:['de'],w:'dépendre de qc; de + le = du.'},
+ {q:'Ne te moque pas ___ moi !',a:'de',w:'se moquer de qn.'},
+ {q:'Qui s\'occupe ___ enfants ?',a:'des',half:['de'],w:'s\'occuper de qn; de + les = des.'},
+ {q:'Il se plaint toujours ___ bruit.',a:'du',half:['de'],w:'se plaindre de qc; de + le = du.'},
+ {q:'Elle rêve ___ Paris.',a:'de',w:'rêver de qc.'},
+ {q:'Tu te souviens ___ élections de 2017 ?',a:'des',half:['de'],w:'se souvenir de qc; de + les = des.'},
+ {q:'On profite ___ beau temps.',a:'du',half:['de'],w:'profiter de qc; de + le = du.'},
+ {q:'Ce vélo appartient ___ mon voisin.',a:'à',w:'appartenir à qn.'},
+ {q:'Je m\'intéresse ___ la politique.',a:'à',w:'s\'intéresser à qc (deutsch: sich für etw. interessieren).'},
+ {q:'Elle s\'habitue ___ sa nouvelle école.',a:'à',w:'s\'habituer à qc.'},
+ {q:'Réponds ___ professeur !',a:'au',half:['à'],w:'répondre à qn; à + le = au.'},
+ {q:'J\'ai promis un cadeau ___ ma sœur.',a:'à',w:'promettre qc à qn – die Person bekommt à.'},
+ {q:'Il a proposé une solution ___ maire.',a:'au',half:['à'],w:'proposer qc à qn; à + le = au.'},
+ {q:'Elle montre ses photos ___ amis.',a:'aux',half:['à'],w:'montrer qc à qn; à + les = aux.'},
+ {q:'On m\'a invité ___ une fête.',a:'à',w:'inviter qn à qc.'},
+ {q:'Il a volé un vélo ___ voisin.',a:'au',half:['à'],w:'voler qc à qn (jdm. etw. stehlen); à + le = au.'},
+ {q:'Je vais ___ voter dimanche.',a:'—',w:'aller faire qc – Infinitiv ohne Präposition.'},
+ {q:'J\'espère ___ gagner.',a:'—',w:'espérer faire qc – ohne de (anders als im Deutschen «zu»).'},
+ {q:'Nous devons ___ partir.',a:'—',w:'devoir faire qc – ohne Präposition.'},
+ {q:'Il préfère ___ prendre le vélo.',a:'—',w:'préférer faire qc – ohne Präposition.'},
+ {q:'J\'adore ___ faire du ski.',a:'—',w:'adorer faire qc – ohne Präposition.'},
+ {q:'Il a du mal ___ se concentrer.',a:'à',w:'avoir du mal à faire qc.'},
+ {q:'Elle apprend ___ conduire.',a:'à',w:'apprendre à faire qc.'},
+ {q:'Il commence ___ pleuvoir.',a:'à',w:'commencer à faire qc.'},
+ {q:'Mes parents m\'encouragent ___ voter.',a:'à',w:'encourager qn à faire qc.'},
+ {q:'Le candidat a réussi ___ convaincre les électeurs.',a:'à',w:'réussir à faire qc.'},
+ {q:'N\'hésite pas ___ poser des questions.',a:'à',w:'hésiter à faire qc.'},
+ {q:'Arrête ___ parler !',a:'de',w:'arrêter de faire qc.'},
+ {q:'J\'ai envie ___ dormir.',a:'de',w:'avoir envie de faire qc.'},
+ {q:'On a décidé ___ partir plus tôt.',a:'de',w:'décider de faire qc.'},
+ {q:'Il risque ___ perdre les élections.',a:'de',w:'risquer de faire qc.'},
+ {q:'J\'ai oublié ___ fermer la porte.',a:'de',w:'oublier de faire qc.'},
+ {q:'Le prof nous demande ___ être à l\'heure.',a:'d\'',half:['de'],w:'demander à qn de faire qc; vor Vokal: d\'.'},
+ {q:'Dépêche-toi ___ finir !',a:'de',w:'se dépêcher de faire qc.'},
+ {q:'Je viens ___ arriver.',a:'d\'',half:['de'],w:'venir de faire qc (gerade etw. getan haben); vor Vokal: d\'.'},
+ {q:'Elle essaie ___ comprendre.',a:'de',w:'essayer de faire qc.'},
+ {q:'Il fait semblant ___ dormir.',a:'de',w:'faire semblant de faire qc.'},
+ {q:'La pluie m\'empêche ___ sortir.',a:'de',w:'empêcher qn de faire qc.'},
+ {q:'Tu as le droit ___ voter à 18 ans.',a:'de',w:'avoir le droit de faire qc.'},
+ {q:'Je suis en train ___ lire.',a:'de',w:'être en train de faire qc.'},
+ {q:'Il me reproche ___ être en retard.',a:'d\'',half:['de'],w:'reprocher à qn de faire qc; vor Vokal: d\'.'},
+].map(x=>({...x,o:PREP})),
+pp:[
+ {q:'parler → participe présent: ___',a:'parlant',w:'nous parlons → parl- + -ant'},
+ {q:'finir → ___',a:'finissant',w:'nous finissons → finiss- + -ant'},
+ {q:'choisir → ___',a:'choisissant',w:'nous choisissons → choisiss- + -ant'},
+ {q:'prendre → ___',a:'prenant',w:'nous prenons → pren- + -ant'},
+ {q:'faire → ___',a:'faisant',w:'nous faisons → fais- + -ant'},
+ {q:'dire → ___',a:'disant',w:'nous disons → dis- + -ant'},
+ {q:'lire → ___',a:'lisant',w:'nous lisons → lis- + -ant'},
+ {q:'écrire → ___',a:'écrivant',w:'nous écrivons → écriv- + -ant'},
+ {q:'boire → ___',a:'buvant',w:'nous buvons → buv- + -ant'},
+ {q:'voir → ___',a:'voyant',w:'nous voyons → voy- + -ant'},
+ {q:'croire → ___',a:'croyant',w:'nous croyons → croy- + -ant'},
+ {q:'venir → ___',a:'venant',w:'nous venons → ven- + -ant'},
+ {q:'vouloir → ___',a:'voulant',w:'nous voulons → voul- + -ant'},
+ {q:'commencer → ___',a:'commençant',w:'nous commençons → das ç bleibt: commençant'},
+ {q:'manger → ___',a:'mangeant',w:'nous mangeons → das e bleibt: mangeant'},
+ {q:'convaincre → ___',a:'convainquant',w:'nous convainquons → convainqu- + -ant'},
+ {q:'réduire → ___',a:'réduisant',w:'nous réduisons → réduis- + -ant'},
+ {q:'craindre → ___',a:'craignant',w:'nous craignons → craign- + -ant'},
+ {q:'obtenir → ___',a:'obtenant',w:'nous obtenons → obten- + -ant'},
+ {q:'être → ___',a:'étant',w:'Ausnahme: être → étant'},
+ {q:'avoir → ___',a:'ayant',w:'Ausnahme: avoir → ayant'},
+ {q:'savoir → ___',a:'sachant',w:'Ausnahme: savoir → sachant'},
+ {q:'Les jeunes ___ au CMJ ont beaucoup d\'idées.',h:'qui s\'engagent',a:'s\'engageant',w:'qui s\'engagent → s\'engageant (nous nous engageons). Das Reflexivpronomen bleibt.'},
+ {q:'Les élèves ___ le français à l\'école parlent bien.',h:'qui apprennent',a:'apprenant',w:'qui apprennent → apprenant (nous apprenons).'},
+ {q:'Une loi ___ la pollution sera votée.',h:'qui réduit',a:'réduisant',w:'qui réduit → réduisant (nous réduisons).'},
+ {q:'Les citoyens ___ 18 ans peuvent voter.',h:'qui ont',a:'ayant',w:'qui ont → ayant (Ausnahme).'},
+ {q:'___ malade, elle n\'est pas venue.',h:'Comme elle était',a:'étant',w:'Begründung: Comme elle était → Étant (Ausnahme).'},
+ {q:'Les candidats ___ la majorité absolue sont élus.',h:'qui obtiennent',a:'obtenant',w:'qui obtiennent → obtenant (nous obtenons). Keine Pluralendung!'},
+ {q:'___ la réponse, il a levé la main.',h:'Comme il savait',a:'sachant',w:'Comme il savait → Sachant (Ausnahme).'},
+ {q:'Les femmes ___ trois langues trouvent facilement du travail.',h:'qui parlent',a:'parlant',w:'qui parlent → parlant. Unveränderlich: nicht «parlantes».'},
+],
+ger:[
+ {q:'Il fait ses devoirs ___ la radio.',h:'écouter – gleichzeitig',a:'en écoutant',w:'en + participe présent: en écoutant.'},
+ {q:'On apprend beaucoup ___ les journaux.',h:'lire',a:'en lisant',w:'nous lisons → en lisant (Art und Weise: indem man liest).'},
+ {q:'Elle s\'est cassé la jambe ___ du ski.',h:'faire',a:'en faisant',w:'nous faisons → en faisant (während sie Ski fuhr).'},
+ {q:'___ le vélo, tu réduis la pollution.',h:'prendre',a:'en prenant',w:'nous prenons → en prenant.'},
+ {q:'Il a eu un accident ___ la rue.',h:'traverser',a:'en traversant',w:'en traversant (als er die Strasse überquerte).'},
+ {q:'Nous avons convaincu le maire ___ de bons arguments.',h:'présenter',a:'en présentant',w:'en présentant (indem wir … vorbrachten).'},
+ {q:'Ne mange pas ___ !',h:'parler',a:'en parlant',w:'en parlant (während du sprichst).'},
+ {q:'___ au CMJ, on apprend beaucoup sur la politique.',h:'être',a:'en étant',w:'être → étant (Ausnahme): en étant.'},
+ {q:'Tu vas réussir ___ régulièrement.',h:'travailler',a:'en travaillant',w:'en travaillant (indem du regelmässig arbeitest).'},
+ {q:'Il s\'est endormi ___ la télé.',h:'regarder',a:'en regardant',w:'en regardant (während er fernsah).'},
+ {q:'___ , les citoyens choisissent leur gouvernement.',h:'voter',a:'en votant',w:'en votant (indem sie wählen).'},
+ {q:'Elle est partie ___ au revoir.',h:'ne pas dire',a:'en ne disant pas',w:'Verneinung: en ne disant pas (ohne Tschüss zu sagen).'},
+ {q:'Il chante en prenant sa douche.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Gleichzeitigkeit',w:'Er singt, während er duscht.'},
+ {q:'C\'est en travaillant qu\'on réussit.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Art und Weise',w:'Wie erreicht man Erfolg? Indem man arbeitet.'},
+ {q:'En partant maintenant, tu arriveras à l\'heure.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Bedingung',w:'Wenn du jetzt gehst, kommst du pünktlich an.'},
+ {q:'Elle lit le journal en buvant son café.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Gleichzeitigkeit',w:'Sie liest, während sie Kaffee trinkt.'},
+ {q:'Il a appris l\'anglais en regardant des séries.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Art und Weise',w:'Wie hat er Englisch gelernt? Indem er Serien schaute.'},
+ {q:'En prenant le bus, tu ne seras pas en retard.',h:'Was drückt das Gérondif aus?',o:['Gleichzeitigkeit','Art und Weise','Bedingung'],a:'Bedingung',w:'Wenn du den Bus nimmst, bist du nicht zu spät.'},
+ {q:'Les élèves ___ à la cantine paient cinq euros.',h:'= qui mangent',o:['mangeant','en mangeant'],a:'mangeant',w:'Es beschreibt die Schüler (ein Nomen) → Participe présent.'},
+ {q:'Il lit ___ .',h:'= während er isst',o:['mangeant','en mangeant'],a:'en mangeant',w:'Es sagt, wann/wie er liest (bezieht sich aufs Verb) → Gérondif.'},
+ {q:'Une femme ___ trois langues cherche du travail.',h:'= qui parle',o:['parlant','en parlant'],a:'parlant',w:'Beschreibt die Frau → Participe présent.'},
+ {q:'On apprend une langue ___ beaucoup.',h:'= indem man viel spricht',o:['parlant','en parlant'],a:'en parlant',w:'Wie lernt man? → Gérondif.'},
+],
+rel:[
+ {q:'Le candidat ___ a gagné s\'appelle Martin.',a:'qui',w:'Danach folgt direkt das Verb → Subjekt → qui.'},
+ {q:'La loi ___ les députés ont votée est importante.',a:'que',w:'Danach folgt ein Subjekt (les députés) → Objekt → que.'},
+ {q:'La ville ___ j\'habite a un CMJ.',a:'où',w:'Ort → où.'},
+ {q:'Le jour ___ il est né, il pleuvait.',a:'où',w:'Zeitpunkt → où (nicht quand!).'},
+ {q:'Le projet ___ je te parle est génial.',a:'dont',w:'parler de qc → dont.'},
+ {q:'C\'est le livre ___ j\'ai besoin.',a:'dont',w:'avoir besoin de qc → dont.'},
+ {q:'Voilà l\'élue ___ tout le monde se souvient.',a:'dont',w:'se souvenir de qn → dont.'},
+ {q:'C\'est un homme politique ___ je ne crois pas les promesses.',a:'dont',w:'les promesses de cet homme → dont.'},
+ {q:'Je ne comprends pas ___ se passe.',a:'ce qui',w:'Kein Bezugswort («das, was») und Subjekt (danach Verb) → ce qui.'},
+ {q:'Dis-moi ___ tu veux.',a:'ce que',w:'Kein Bezugswort und Objekt (danach Subjekt tu) → ce que.'},
+ {q:'___ m\'intéresse, c\'est la politique.',a:'ce qui',w:'«Das, was mich interessiert» – Subjekt → ce qui.'},
+ {q:'___ je préfère, c\'est le vélo.',a:'ce que',w:'«Das, was ich bevorzuge» – Objekt → ce que.'},
+ {q:'La raison pour ___ il s\'abstient est simple.',a:'laquelle',w:'Präposition pour + la raison (weiblich) → laquelle.'},
+ {q:'Le parti pour ___ je vote est petit.',a:'lequel',w:'pour + le parti (männlich) → lequel.'},
+ {q:'C\'est le stylo avec ___ j\'ai signé.',a:'lequel',w:'avec + le stylo (männlich) → lequel.'},
+ {q:'Les arguments sur ___ il s\'appuie sont faibles.',a:'lesquels',w:'sur + les arguments (männlich Plural) → lesquels.'},
+ {q:'Le problème ___ nous pensons est grave.',a:'auquel',w:'penser à qc; à + lequel = auquel.'},
+ {q:'La commission à ___ il participe s\'occupe des jeunes.',a:'laquelle',w:'participer à qc; à + laquelle bleibt getrennt.'},
+ {q:'C\'est un jeune ___ s\'engage beaucoup.',a:'qui',w:'Danach folgt das Verb (s\'engage) → qui.'},
+ {q:'Le résultat ___ nous attendions est arrivé.',a:'que',w:'Danach folgt ein Subjekt (nous) → que.'},
+ {q:'L\'épicerie ___ je fais mes courses est fermée.',a:'où',w:'Ort → où.'},
+ {q:'Le vélo ___ j\'ai acheté est rouge.',a:'que',w:'acheter qc → Objekt → que.'},
+ {q:'Les élections ___ on parle auront lieu en mai.',a:'dont',w:'parler de qc → dont.'},
+ {q:'Les questions auxquelles il répond sont difficiles.',h:'Welches Pronomen steckt in «auxquelles»?',o:['à + lesquelles','de + lesquelles','à + laquelle'],a:'à + lesquelles',w:'répondre à qc; à + lesquelles = auxquelles.'},
+],
+poss:[
+ {q:'C\'est ton livre ? – Oui, c\'est ___ .',h:'meins',a:'le mien',w:'le livre → männlich Singular: le mien.'},
+ {q:'Ce n\'est pas ma voiture, c\'est ___ .',h:'seine / ihre (eine Person)',a:'la sienne',w:'la voiture → weiblich: la sienne. Es richtet sich nach dem Besitz, nicht nach dem Besitzer.'},
+ {q:'Nos parents et ___ se connaissent.',h:'eure',a:'les vôtres',w:'les parents → Plural: les vôtres (mit Accent circonflexe).'},
+ {q:'Ta proposition est meilleure que ___ .',h:'meine',a:'la mienne',w:'la proposition → weiblich: la mienne.'},
+ {q:'Mes résultats sont bons. Et ___ ?',h:'deine',a:'les tiens',w:'les résultats → männlich Plural: les tiens.'},
+ {q:'Leur maison est plus grande que ___ .',h:'unsere',a:'la nôtre',w:'la maison → la nôtre (Pronomen mit ô).'},
+ {q:'Ces clés sont à eux ? – Oui, ce sont ___ .',h:'ihre (mehrere Besitzer)',a:'les leurs',w:'mehrere Besitzer, Plural → les leurs.'},
+ {q:'Mes idées et ___ sont différentes.',h:'seine',a:'les siennes',w:'les idées → weiblich Plural: les siennes.'},
+ {q:'Votre vélo est neuf, ___ est vieux.',h:'unseres',a:'le nôtre',w:'le vélo → le nôtre.'},
+ {q:'Ce casque, c\'est ___ ?',h:'deiner',a:'le tien',w:'le casque → le tien.'},
+ {q:'Notre commune est petite. Comment est ___ ?',h:'eure',a:'la vôtre',w:'la commune → la vôtre.'},
+ {q:'J\'ai oublié mes cahiers. Tu me prêtes ___ ?',h:'deine',a:'les tiens',w:'les cahiers → les tiens.'},
+],
+};
+
+// Erklärungen
+const EXPLAIN={
+vocab:`<p>Hier lernst du den Wortschatz aus Dossier 5 (S. 183–188).</p>
+<ul><li>Bei Nomen schreibst du den <b>Artikel</b> mit: <i>une décision</i>, <i>le pouvoir</i>.</li>
+<li><i>qn</i> und <i>qc</i> darfst du weglassen. Präpositionen wie <i>de</i> oder <i>à</i> gehören aber zur Antwort: <i>risquer de</i>.</li>
+<li>Bei Adjektiven reicht die männliche Form: <i>engagé</i>.</li></ul>
+<div class="note">Tipp aus dem Buch: Lerne über Wortfamilien. <i>réunir → une réunion</i>, <i>une élection → élire</i>, <i>une promesse → promettre</i>.</div>`,
+verbs:`<p>Unregelmässige Verben im Présent. Viele gehören zu <b>Familien</b>: Wer das Vorbild kann, kann alle.</p>
+<table><tr><th>Vorbild</th><th>Konjugiert genauso</th></tr>
+<tr><td><b>venir</b></td><td>devenir, se souvenir, obtenir, s'abstenir, tenir</td></tr>
+<tr><td><b>réduire</b></td><td>construire, détruire</td></tr>
+<tr><td><b>craindre</b></td><td>s'éteindre (je m'éteins, nous nous éteignons)</td></tr>
+<tr><td><b>choisir</b></td><td>définir, réunir</td></tr></table>`,
+pp:`<h3>Wozu?</h3>
+<p>Das Participe présent ersetzt vor allem in geschriebenen Texten einen <b>Relativsatz mit qui</b> oder eine <b>Begründung</b>.</p>
+<ul><li>Les jeunes <b>qui s'engagent</b> au CMJ … → Les jeunes <b>s'engageant</b> au CMJ …</li>
+<li><b>Comme il était</b> malade, il est resté chez lui. → <b>Étant</b> malade, …</li></ul>
+<h3>Bildung</h3>
+<p>Nimm die <b>nous-Form</b> im Présent, streiche <b>-ons</b> und hänge <b>-ant</b> an.</p>
+<table><tr><th>nous-Form</th><th>Participe présent</th></tr>
+<tr><td>nous parl<b>ons</b></td><td>parl<b class="k">ant</b></td></tr>
+<tr><td>nous choisiss<b>ons</b></td><td>choisiss<b class="k">ant</b></td></tr>
+<tr><td>nous pren<b>ons</b></td><td>pren<b class="k">ant</b></td></tr>
+<tr><td>nous commenç<b>ons</b></td><td>commenç<b class="k">ant</b></td></tr>
+<tr><td>nous mange<b>ons</b></td><td>mange<b class="k">ant</b></td></tr></table>
+<div class="note"><b>Nur drei Ausnahmen:</b> être → <b>étant</b> · avoir → <b>ayant</b> · savoir → <b>sachant</b></div>
+<h3>Typische Fehler</h3>
+<ul><li>Das Participe présent ist <b>unveränderlich</b>: les femmes parlant (nicht <s>parlantes</s>).</li>
+<li>Bei reflexiven Verben bleibt das Pronomen: s'engager → <b>s'engageant</b>.</li></ul>`,
+ger:`<h3>Bildung</h3>
+<p><b>en + Participe présent</b>: en parlant, en choisissant, en faisant, en étant.</p>
+<p>Verneinung: <b>en ne</b> parlant <b>pas</b>.</p>
+<div class="note">Beide Handlungen haben <b>dasselbe Subjekt</b>: <i>Il</i> écoute de la musique en <i>faisant</i> ses devoirs. (Er hört Musik, und er macht die Hausaufgaben.)</div>
+<h3>Was drückt es aus?</h3>
+<table><tr><th>Bedeutung</th><th>Deutsch</th><th>Beispiel</th></tr>
+<tr><td><b>Gleichzeitigkeit</b></td><td>während, als</td><td>Il chante <b>en prenant</b> sa douche.</td></tr>
+<tr><td><b>Art und Weise</b></td><td>indem, dadurch dass</td><td>On apprend <b>en lisant</b>.</td></tr>
+<tr><td><b>Bedingung</b></td><td>wenn</td><td><b>En partant</b> maintenant, tu arriveras à l'heure.</td></tr></table>
+<h3>Gérondif oder Participe présent?</h3>
+<ul><li><b>Gérondif</b> (mit en) bezieht sich auf das <b>Verb</b>: Wann? Wie? → Il lit <b>en mangeant</b>.</li>
+<li><b>Participe présent</b> (ohne en) beschreibt ein <b>Nomen</b>: Welche Person? → Les élèves <b>mangeant</b> à la cantine …</li></ul>`,
+rel:`<h3>So findest du das richtige Pronomen</h3>
+<p>Geh die Fragen der Reihe nach durch:</p>
+<table><tr><th>Frage</th><th>Pronomen</th><th>Beispiel</th></tr>
+<tr><td>1. Gibt es <b>kein Bezugswort</b> («das, was»)?</td><td><b>ce qui</b> (Subjekt)<br><b>ce que</b> (Objekt)</td><td><b>Ce qui</b> m'intéresse, c'est …<br>Dis-moi <b>ce que</b> tu veux.</td></tr>
+<tr><td>2. Steht beim Verb <b>de</b>? (parler de, avoir besoin de, se souvenir de …)</td><td><b>dont</b></td><td>le projet <b>dont</b> je parle</td></tr>
+<tr><td>3. Steht eine <b>andere Präposition</b> davor? (pour, avec, sur, à …)</td><td><b>lequel, laquelle, lesquels, lesquelles</b></td><td>le parti pour <b>lequel</b> je vote</td></tr>
+<tr><td>4. Geht es um einen <b>Ort</b> oder <b>Zeitpunkt</b>?</td><td><b>où</b></td><td>la ville <b>où</b> j'habite<br>le jour <b>où</b> il est né</td></tr>
+<tr><td>5. Folgt direkt ein <b>Verb</b>? → Subjekt</td><td><b>qui</b></td><td>le candidat <b>qui</b> gagne</td></tr>
+<tr><td>6. Folgt ein <b>Subjekt</b>? → Objekt</td><td><b>que / qu'</b></td><td>la loi <b>que</b> les députés votent</td></tr></table>
+<h3>à und de mit lequel</h3>
+<table><tr><th></th><th>männlich</th><th>weiblich</th><th>m. Plural</th><th>w. Plural</th></tr>
+<tr><td>à +</td><td><b>auquel</b></td><td>à laquelle</td><td><b>auxquels</b></td><td><b>auxquelles</b></td></tr><tr><td>de +</td><td><b>duquel</b></td><td>de laquelle</td><td><b>desquels</b></td><td><b>desquelles</b></td></tr></table>
+<p class="hint">Bei de nimmt man aber fast immer einfach <b>dont</b>.</p>
+<div class="note">Merksatz: Nach <b>qui</b> kommt ein Verb (evtl. mit me/te/se davor), nach <b>que</b> kommt ein Subjekt.</div>`,
+poss:`<p>Possessivpronomen ersetzen ein Nomen mit Possessivbegleiter: <i>mon livre → le mien</i>.</p>
+<table><tr><th></th><th>m. Sg.</th><th>w. Sg.</th><th>m. Pl.</th><th>w. Pl.</th></tr>
+<tr><td>je</td><td>le mien</td><td>la mienne</td><td>les miens</td><td>les miennes</td></tr>
+<tr><td>tu</td><td>le tien</td><td>la tienne</td><td>les tiens</td><td>les tiennes</td></tr>
+<tr><td>il/elle</td><td>le sien</td><td>la sienne</td><td>les siens</td><td>les siennes</td></tr>
+<tr><td>nous</td><td>le nôtre</td><td>la nôtre</td><td colspan="2">les nôtres</td></tr>
+<tr><td>vous</td><td>le vôtre</td><td>la vôtre</td><td colspan="2">les vôtres</td></tr>
+<tr><td>ils/elles</td><td>le leur</td><td>la leur</td><td colspan="2">les leurs</td></tr></table>
+<div class="note">Das Pronomen richtet sich nach dem <b>Besitz</b>, nicht nach dem Besitzer: <i>sa voiture</i> (seine oder ihre) → <b>la sienne</b>.<br>Mit Accent: le n<b>ô</b>tre, le v<b>ô</b>tre – ohne Accent: notre, votre (Begleiter).</div>`,
+};
+
+// ===================== AUFBEREITUNG =====================
+const VERBS=VERB_RAW.split('\n').map(l=>{const[fr,de,f,like]=l.split('|');return{fr,de,forms:f.split(','),like}});
 const BY=Object.fromEntries(VERBS.map(v=>[v.fr,v]));
 const PRON=['je','tu','il/elle','nous','vous','ils/elles'];
 const pron=(v,i)=>v.forms.length===1?'il':i?PRON[i]:(/^[aeiouyhéèêâîô]/.test(v.forms[0])?"j'":'je');
-const DAY=864e5;
 
-// ---------- state ----------
+const norm=s=>s.toLowerCase().replace(/[’`´]/g,"'").replace(/\s*\/\s*/g,'/').replace(/\s*,\s*/g,'/').replace(/\s+/g,' ').trim();
+const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+const clean=s=>s.replace(/\([^)]*\)/g,'').replace(/\b(qn|qc)(\/(qn|qc))?\b/g,'').replace(/\s+/g,' ').trim().replace(/ faire$/,'').trim();
+function judgeList(input,acc,half){
+  const x=norm(clean(input)),A=acc.map(a=>norm(clean(a)));
+  if(A.includes(x))return 0;
+  if(x&&A.some(a=>strip(a)===strip(x)))return .5;
+  if(half&&half.map(norm).includes(x))return .5;
+  return 1;
+}
+const judge=(input,answer)=>judgeList(input,answer.split('/'));
+
+const CARDS={}; // id -> {type, topic, ...}
+VERBS.forEach(v=>CARDS['v:'+v.fr]={type:'verb',topic:'verbs',v});
+VOCAB_RAW.split('\n').forEach(l=>{
+  const[fr,de]=l.split('|'),alts=fr.split(' ; '),disp=alts[0];
+  const acc=[];alts.forEach(a=>{const c=clean(a);acc.push(c);if(c.includes('/'))acc.push(c.split('/')[0])});
+  CARDS['w:'+disp]={type:'vocab',topic:'vocab',fr:disp,de,acc};
+});
+PAIR_RAW.split('\n').forEach(l=>{const[g,fr,de]=l.split('|');CARDS['p:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr]}});
+Object.entries(ITEMS).forEach(([t,list])=>list.forEach((it,i)=>CARDS[`i:${t}:${i}`]={type:'item',topic:t,...it,a:[].concat(it.a)}));
+// Verknüpfung Vokabel <-> Verb-Ergänzung (gleiche Form)
+const LINK={};
+Object.entries(CARDS).forEach(([id,c])=>{if(c.type==='vocab'){const k=norm(clean(c.fr));Object.entries(CARDS).forEach(([id2,c2])=>{if(c2.type==='pair'&&norm(clean(c2.fr))===k){LINK[id]=id2;LINK[id2]=id}})}});
+
+// ===================== ZUSTAND =====================
 const KEY='verbes-v1';
 let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S)S={sel:VERBS.map(v=>v.fr),dir:'fr',cards:{},session:null};
+// Migration aus Version 1 (nur Verben)
+Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
+if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const card=fr=>S.cards[fr]||(S.cards[fr]={ease:2.5,ivl:0,due:0,reps:0,lapses:0,err:[0,0,0,0,0,0]});
-const status=fr=>{const c=S.cards[fr];if(!c||(!c.reps&&!c.lapses))return'new';return c.ivl>=7?'sure':'learn'};
-const isDue=fr=>!S.cards[fr]||S.cards[fr].due<=Date.now();
+const DAY=864e5;
+const card=id=>S.cards[id]||(S.cards[id]={ease:2.5,ivl:0,due:0,reps:0,lapses:0,err:[0,0,0,0,0,0]});
+const status=id=>{const c=S.cards[id];if(!c||(!c.reps&&!c.lapses))return'new';return c.ivl>=7?'sure':'learn'};
+const isDue=id=>!S.cards[id]||S.cards[id].due<=Date.now();
 
-// ---------- checking ----------
-const norm=s=>s.toLowerCase().replace(/[’`´]/g,"'").replace(/\s+/g,' ').trim();
-const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'');
-function judge(input,answer){ // 0 richtig, .5 nur Akzent, 1 falsch
-  const a=answer.split('/').map(norm),x=norm(input);
-  if(a.includes(x))return 0;
-  if(x&&a.some(y=>strip(y)===strip(x)))return .5;
-  return 1;
+const TOPICS=[
+ {id:'vocab',title:'Vocabulaire',sub:'Dossier 5 · S. 183–188'},
+ {id:'verbs',title:'Verbes au présent',sub:'Konjugation'},
+ {id:'comp',title:'Compléments du verbe',sub:'Cahier S. 59/60'},
+ {id:'pp',title:'Participe présent',sub:'parlant, ayant …'},
+ {id:'ger',title:'Gérondif',sub:'en parlant'},
+ {id:'rel',title:'Pronoms relatifs',sub:'qui, que, où, dont, lequel …'},
+ {id:'poss',title:'Pronoms possessifs',sub:'le mien, la tienne …'},
+];
+const TOP=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+function cardsOf(tid){
+  if(!tid)return TOPICS.flatMap(t=>cardsOf(t.id));
+  if(tid==='verbs')return S.sel.filter(f=>BY[f]).map(f=>'v:'+f);
+  return Object.keys(CARDS).filter(id=>CARDS[id].topic===tid);
 }
 
-// ---------- spaced repetition (vereinfachtes SM-2) ----------
+// ===================== SPACED REPETITION (vereinfachtes SM-2) =====================
 // g: 0 Nochmals, 1 Schwer, 2 Gut, 3 Einfach
-function schedule(fr,g,mode){
-  const c=card(fr),now=Date.now();
+function nextIvl(c,g){return g===0?0:g===1?(c.reps?Math.max(1,c.ivl*1.2):1):g===2?(c.reps===0?1:c.reps===1?3:c.ivl*c.ease):(c.reps===0?3:c.ivl*c.ease*1.3)}
+function schedule(id,g,mode){
+  const c=card(id),now=Date.now();
   if(mode==='all'&&g>=2&&c.reps>0)return; // freies Üben schiebt nichts nach hinten
   if(g===0){c.lapses++;c.reps=0;c.ease=Math.max(1.3,c.ease-.2);c.ivl=0;c.due=now+6e4;return}
-  if(g===1){c.ease=Math.max(1.3,c.ease-.15);c.ivl=c.reps?Math.max(1,c.ivl*1.2):1}
-  if(g===2)c.ivl=c.reps===0?1:c.reps===1?3:c.ivl*c.ease;
-  if(g===3){c.ivl=c.reps===0?3:c.ivl*c.ease*1.3;c.ease+=.15}
+  c.ivl=nextIvl(c,g);
+  if(g===1)c.ease=Math.max(1.3,c.ease-.15);
+  if(g===3)c.ease+=.15;
   c.reps++;c.due=now+c.ivl*DAY;
 }
-function preview(fr,g){ // Text für die Buttons
-  const c=card(fr);
+function preview(id,g){
+  const c=card(id);
   if(S.session.mode==='all'&&g>=2&&c.reps>0)return'unverändert';
-  const ivl=g===0?0:g===1?(c.reps?Math.max(1,c.ivl*1.2):1):g===2?(c.reps===0?1:c.reps===1?3:c.ivl*c.ease):(c.reps===0?3:c.ivl*c.ease*1.3);
-  return ivl===0?'gleich nochmals':Math.round(ivl)===1?'1 Tag':Math.round(ivl)+' Tage';
+  const d=Math.round(nextIvl(c,g));
+  return g===0?'gleich nochmals':d===1?'1 Tag':d+' Tage';
 }
 
-// ---------- home ----------
+// ===================== HILFSFUNKTIONEN =====================
 const app=document.getElementById('app');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const gapify=q=>esc(q).replace('___','<span class="gap">&nbsp;</span>');
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function counts(ids){let due=0,neu=0,sure=0;ids.forEach(id=>{if(isDue(id))due++;const s=status(id);if(s==='new')neu++;if(s==='sure')sure++});return{due,neu,sure,total:ids.length}}
+
+// ===================== STARTSEITE =====================
 function home(){
-  const sel=S.sel.filter(f=>BY[f]);
-  const due=sel.filter(isDue).length,neu=sel.filter(f=>status(f)==='new').length,sure=sel.filter(f=>status(f)==='sure').length;
-  const s=S.session;
-  let next='';
-  if(!due&&sel.length){const d=Math.min(...sel.map(f=>S.cards[f].due));next=`<p class="hint">Heute ist nichts mehr fällig. Nächste Wiederholung: ${new Date(d).toLocaleString('de-CH',{weekday:'long',hour:'2-digit',minute:'2-digit'})}.</p>`}
+  cur=null;
+  const all=cardsOf(),k=counts(all),s=S.session;
   app.innerHTML=`
-  <h1>Verbes</h1><p class="sub">Présent · ${VERBS.length} Verben</p>
+  <h1>Français</h1><p class="sub">Dossier 5 · Vokabeln, Verben und Grammatik</p>
   <div class="stats">
-    <div class="stat"><b>${due}</b><span>fällig</span></div>
-    <div class="stat"><b>${neu}</b><span>neu</span></div>
-    <div class="stat"><b>${sure}</b><span>sicher</span></div>
+    <div class="stat"><b>${k.due}</b><span>fällig</span></div>
+    <div class="stat"><b>${k.neu}</b><span>neu</span></div>
+    <div class="stat"><b>${k.sure}</b><span>sicher</span></div>
   </div>
-  ${s?`<button class="btn primary" id="resume">Runde fortsetzen (${s.done} / ${s.total})</button>`:''}
-  <button class="btn ${s?'':'primary'}" id="due" ${due?'':'disabled'}>Fällige lernen (${due})</button>
-  <button class="btn" id="all" ${sel.length?'':'disabled'}>Alle ${sel.length} Verben durchgehen</button>
-  ${next}
-  <p class="hint">«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.</p>
-  <h2>Abfrage</h2>
+  ${s?`<button class="btn primary" id="resume">${s.exam?'Prüfung':'Runde'} fortsetzen (${s.done} / ${s.total})</button>`:''}
+  <button class="btn ${s?'':'primary'}" id="due" ${k.due?'':'disabled'}>Alles Fällige lernen (${k.due})</button>
+  <button class="btn" id="exam">Prüfung starten (20 Aufgaben)</button>
+  <h2>Lernziele</h2>
+  ${TOPICS.map(t=>{const c=counts(cardsOf(t.id));return`<div class="topic">
+    <a class="name" href="#t-${t.id}"><b>${t.title}</b><span>${c.due} fällig · ${c.sure} von ${c.total} sicher</span><div class="meter" aria-hidden="true"><i style="width:${c.total?c.sure/c.total*100:0}%"></i></div></a>
+    <button class="btn ${c.due?'primary':''}" data-learn="${t.id}" ${c.due?'':'disabled'} aria-label="${t.title} lernen">Lernen</button></div>`}).join('')}
+  <h2>Abfragerichtung (Verben und Vokabeln)</h2>
   <div class="seg" role="radiogroup" aria-label="Richtung">
-    ${[['de','Deutsch → Franz.'],['fr','Französisch'],['mix','Gemischt']].map(([k,t])=>`<label><input type="radio" name="dir" value="${k}" ${S.dir===k?'checked':''}>${t}</label>`).join('')}
+    ${[['de','Deutsch → Franz.'],['fr','Französisch'],['mix','Gemischt']].map(([v,t])=>`<label><input type="radio" name="dir" value="${v}" ${S.dir===v?'checked':''}>${t}</label>`).join('')}
   </div>
-  <p class="hint">${S.dir==='fr'?'Du siehst den Infinitiv und konjugierst.':'Bei Deutsch gibst du zuerst den französischen Infinitiv ein, dann konjugierst du.'}</p>
-  <div class="row-head"><h2>Verbes retenus</h2><span><button class="link" id="selAll">Alle</button><button class="link" id="selNone">Keine</button></span></div>
-  <div class="chips">${VERBS.map(v=>{const st=status(v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:'am Lernen',sure:'sicher'}[st];
-    return`<button class="chip" data-fr="${v.fr}" aria-pressed="${S.sel.includes(v.fr)}" aria-label="${v.fr}, ${lab}"><span class="st" aria-hidden="true">${sym}</span>${v.fr}</button>`}).join('')}</div>
-  <p class="legend">○ neu · ◐ am Lernen · ● sicher (Abstand ab 7 Tagen)</p>
+  <p class="hint">${S.dir==='fr'?'Verben: Du siehst den Infinitiv. Vokabeln: Du siehst das französische Wort und bewertest dich selbst.':'Du siehst das deutsche Wort und schreibst das französische.'}</p>
   <div class="row-head"><span id="reset"><button class="link danger" id="resetBtn">Fortschritt zurücksetzen</button></span></div>`;
-  const on=(id,f)=>{const e=document.getElementById(id);e&&(e.onclick=f)};
-  on('resume',next_);on('due',()=>start('due'));on('all',()=>start('all'));
-  on('selAll',()=>{S.sel=VERBS.map(v=>v.fr);save();home()});
-  on('selNone',()=>{S.sel=[];save();home()});
-  on('resetBtn',()=>{document.getElementById('reset').innerHTML=`<span class="confirm">Alles löschen? <button class="link danger" id="yes">Zurücksetzen</button><button class="link" id="no">Abbrechen</button></span>`;
-    on('yes',()=>{S.cards={};S.session=null;save();home()});on('no',home)});
+  const on=(id,f)=>{const e=$(id);e&&(e.onclick=f)};
+  on('resume',next_);on('due',()=>start('due',null));on('exam',startExam);
+  app.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>start('due',b.dataset.learn));
   app.querySelectorAll('input[name=dir]').forEach(r=>r.onchange=()=>{S.dir=r.value;save();home()});
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const f=c.dataset.fr;S.sel=S.sel.includes(f)?S.sel.filter(x=>x!==f):[...S.sel,f];save();home()});
+  on('resetBtn',()=>{$('reset').innerHTML=`<span class="confirm">Alles löschen? <button class="link danger" id="yes">Zurücksetzen</button><button class="link" id="no">Abbrechen</button></span>`;
+    on('yes',()=>{S.cards={};S.session=null;save();home()});on('no',home)});
 }
 
-// ---------- session ----------
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
-function start(mode){
-  let ids=shuffle(S.sel.filter(f=>BY[f]&&(mode==='all'||isDue(f))));
-  if(mode==='due')ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity)); // Wiederholungen zuerst, dann neue
+// ===================== THEMENSEITE =====================
+function topicPage(tid){
+  cur=null;
+  const t=TOP[tid],c=counts(cardsOf(tid));
+  let extra='';
+  if(tid==='comp')extra=PAIR_GROUPS.map(([g,title,note])=>`<details><summary>${g.replace(/[ab]/,'')}. ${title}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${PAIR_RAW.split('\n').filter(l=>l.split('|')[0]===g).map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`).join('')
+    +`<div class="note" style="margin-top:12px">Zusammenziehungen: à + le = <b>au</b> · à + les = <b>aux</b> · de + le = <b>du</b> · de + les = <b>des</b> · vor Vokal: <b>d'</b></div>`;
+  if(tid==='verbs')extra=`<div class="row-head"><h2>Verben auswählen</h2><span><button class="link" id="selAll">Alle</button><button class="link" id="selNone">Keine</button></span></div>
+    <div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:'am Lernen',sure:'sicher'}[st];
+      return`<button class="chip" data-fr="${v.fr}" aria-pressed="${S.sel.includes(v.fr)}" aria-label="${v.fr}, ${lab}"><span class="st" aria-hidden="true">${sym}</span>${v.fr}</button>`}).join('')}</div>
+    <p class="legend">○ neu · ◐ am Lernen · ● sicher (Abstand ab 7 Tagen)</p>`;
+  app.innerHTML=`<a href="#" class="link">‹ Übersicht</a>
+  <h1>${t.title}</h1><p class="sub">${t.sub} · ${c.due} fällig · ${c.sure} von ${c.total} sicher</p>
+  <button class="btn primary" id="learn" ${c.due?'':'disabled'}>Fällige lernen (${c.due})</button>
+  <button class="btn" id="all" ${c.total?'':'disabled'}>Alle ${c.total} durchgehen</button>
+  <p class="hint">«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.</p>
+  <h2>Erklärung</h2><section class="card ex">${EXPLAIN[tid]||''}${tid==='comp'?'<p>Im Französischen braucht ein Verb oft eine andere Ergänzung als im Deutschen. Die Listen aus dem Cahier:</p>':''}${tid==='verbs'?'':extra}</section>${tid==='verbs'?extra:''}`;
+  $('learn').onclick=()=>start('due',tid);$('all').onclick=()=>start('all',tid);
+  if(tid==='verbs'){
+    $('selAll').onclick=()=>{S.sel=VERBS.map(v=>v.fr);save();topicPage(tid)};
+    $('selNone').onclick=()=>{S.sel=[];save();topicPage(tid)};
+    app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const f=b.dataset.fr;S.sel=S.sel.includes(f)?S.sel.filter(x=>x!==f):[...S.sel,f];save();topicPage(tid)});
+  }
+  scrollTo(0,0);
+}
+
+// ===================== SITZUNG =====================
+function start(mode,tid){
+  let ids=shuffle(cardsOf(tid).filter(id=>mode==='all'||isDue(id)));
+  if(mode==='due')ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity)); // Wiederholungen zuerst
   if(!ids.length)return;
-  S.session={mode,queue:ids,total:ids.length,done:0};save();next_();
+  S.session={mode,topic:tid,queue:ids,total:ids.length,done:0};save();
+  if(location.hash){history.replaceState(null,'',location.pathname+location.search)}
+  next_();
+}
+function startExam(){
+  // 20 Aufgaben, möglichst gleichmässig über die Lernziele verteilt
+  const pools=TOPICS.map(t=>shuffle(cardsOf(t.id))).filter(p=>p.length);const q=[];
+  for(let i=0;q.length<20&&pools.some(p=>p.length);i++){const p=pools[i%pools.length];if(p.length)q.push(p.pop())}
+  S.session={mode:'exam',exam:true,queue:shuffle(q),total:q.length,done:0,pts:0,max:0,weak:{}};save();next_();
 }
 let cur=null;
 function next_(){
   const s=S.session;
-  if(!s||!s.queue.length){const t=s?s.total:0;S.session=null;save();return done(t)}
-  const v=BY[s.queue[0]];
-  const dir=S.dir==='mix'?(Math.random()<.5?'de':'fr'):S.dir;
-  cur={v,dir,phase:dir==='de'?'inf':'table',infErr:0,errors:0};
-  drill();
+  if(!s||!s.queue.length){const t=s;S.session=null;save();return done(t)}
+  const id=s.queue[0],c=CARDS[id];
+  let dir=S.dir==='mix'?(Math.random()<.5?'de':'fr'):S.dir;
+  if(c.type==='vocab'&&s.exam)dir='de';
+  cur={id,c,dir,phase:'ask',infErr:0,errors:0};
+  if(c.type==='verb'&&dir==='de')cur.phase='inf';
+  render();
 }
-function drill(){
-  const s=S.session,{v,dir}=cur,c=card(v.fr);
-  app.innerHTML=`
-  <div class="top"><button class="link" id="quit">‹ Beenden</button><span class="count">${s.done} / ${s.total}</span></div>
+function frame(label,promptHtml,body){
+  const s=S.session;
+  return`<div class="top"><button class="link" id="quit">‹ Beenden</button><span class="count">${s.done} / ${s.total}</span></div>
   <div class="bar"><i style="width:${s.done/s.total*100}%"></i></div>
-  <section class="card">
-    <div class="tense">Présent · ${dir==='de'?'Deutsch → Französisch':'Französisch'}</div>
-    <h1 class="word" lang="${dir==='de'?'de':'fr'}">${dir==='de'?v.de:v.fr}</h1>
-    <div id="inf"></div>
-  </section>
-  <section class="card" id="table" ${cur.phase==='inf'?'hidden':''} lang="fr">
-    ${v.forms.map((f,i)=>`<div class="line ${v.forms.length>1&&c.err[i]>=2?'weak':''}"><label class="pr" for="f${i}">${pron(v,i)}</label><input type="text" id="f${i}" data-i="${i}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${i===v.forms.length-1?'done':'next'}"><span class="mark" aria-hidden="true"></span></div><div class="fix" id="x${i}" aria-live="polite"></div>`).join('')}
-    ${v.forms.length>1&&c.err.some(e=>e>=2)?'<p class="weaknote">• Hier hattest du schon öfter Fehler.</p>':''}
-  </section>
-  <div id="actions"></div>
-  <div class="acc" aria-label="Akzente">${'é è ê ë à â ç î ï ô û ù œ'.split(' ').map(a=>`<button tabindex="-1" data-a="${a}">${a}</button>`).join('')}</div>`;
-  document.getElementById('quit').onclick=home;
+  <section class="card"><div class="tense">${label}</div>${promptHtml}<div id="inf"></div></section>${body}
+  <div id="actions"></div>`;
+}
+const ACC=`<div class="acc" aria-label="Akzente">${'é è ê ë à â ç î ï ô û ù œ'.split(' ').map(a=>`<button tabindex="-1" data-a="${a}">${a}</button>`).join('')}</div>`;
+const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
+
+function render(){
+  const {c,dir}=cur,t=TOP[c.topic].title;
+  if(c.type==='verb')return renderVerb();
+  if(c.type==='vocab'&&dir==='fr'){
+    app.innerHTML=frame(`${t} · Französisch → Deutsch`,`<h1 class="word" lang="fr">${esc(c.fr)}</h1>`,'')+ACC;
+    $('actions').innerHTML=`<button class="btn primary" id="show">Lösung zeigen</button>`;
+    $('show').onclick=()=>{$('inf').innerHTML=`<p class="result" style="margin-top:12px">${esc(c.de)}</p>`;
+      $('actions').innerHTML='';showGrades(null,'Wusstest du es?')};
+    $('show').focus();
+  }else if(c.type==='vocab'||c.type==='pair'){
+    const lab=c.type==='vocab'?`${t} · Deutsch → Französisch`:`${t} · Verb mit Ergänzung`;
+    const hint=c.type==='vocab'?'Nomen mit Artikel':'z. B. «aider qn» oder «téléphoner à qn»';
+    app.innerHTML=frame(lab,`<h1 class="word" lang="de">${esc(c.de)}</h1><p class="qhint">${hint}</p>`,`<div class="answer card">${INPUT('ans','Auf Französisch')}<div id="fix"></div></div>`)+ACC;
+    $('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;
+    $('chk').onclick=()=>checkSingle();$('ans').focus();
+  }else{ // item
+    const body=c.o?`<div class="opts">${c.o.map((o,i)=>`<button class="opt" data-o="${esc(o)}" lang="fr">${esc(o)}</button>`).join('')}</div>`
+      :`<div class="answer card">${INPUT('ans','Deine Antwort')}<div id="fix"></div></div>`;
+    app.innerHTML=frame(t,`<p class="word q" lang="fr">${gapify(c.q)}</p>${c.h?`<p class="qhint">${esc(c.h)}</p>`:''}`,body)+(c.o?'':ACC);
+    if(c.o){app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>checkSingle(b.dataset.o));app.querySelector('.opt').focus()}
+    else{$('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;$('chk').onclick=()=>checkSingle();$('ans').focus()}
+  }
+  wire();
+}
+function wire(){
+  $('quit').onclick=()=>{location.hash='';home()};
   app.querySelectorAll('.acc button').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>insert(b.dataset.a)});
-  app.querySelectorAll('#table input').forEach((inp,i,all)=>inp.onkeydown=e=>{if(e.key!=='Enter'||cur.phase!=='table')return;e.preventDefault();e.stopPropagation();const n=[...all].slice(i+1).find(x=>!x.value)||[...all].find(x=>!x.value);n?n.focus():check()});
-  if(cur.phase==='inf'){
-    const box=document.getElementById('inf');
-    box.innerHTML=`<div class="inf"><input type="text" id="infIn" lang="fr" placeholder="Infinitiv auf Französisch" aria-label="Infinitiv auf Französisch" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next"><button class="btn primary" id="infGo">Weiter</button></div>`;
-    const inp=document.getElementById('infIn');inp.focus();
-    const go=()=>{const r=judge(inp.value,v.fr);cur.infErr=r;cur.phase='table';
-      box.innerHTML=`<p class="result" style="color:var(--${r===0?'ok':r<1?'warn':'bad'})">${r===0?'✓':r<1?'~':'✗'} ${v.fr}${r?` <span style="font-weight:400">(du: ${esc(inp.value)||'–'})</span>`:''}</p>`;
-      document.getElementById('table').hidden=false;document.getElementById('f0').focus();actions()};
-    document.getElementById('infGo').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};
-  }else{document.getElementById('f0').focus();actions()}
+  const a=$('ans');if(a)a.onkeydown=e=>{if(e.key==='Enter'&&cur.phase==='ask'){e.preventDefault();e.stopPropagation();checkSingle()}};
 }
-const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let last=null;document.addEventListener('focusin',e=>{if(e.target.matches('input[type=text]'))last=e.target});
-function insert(ch){const i=last;if(!i||i.readOnly)return;const a=i.selectionStart??i.value.length,b=i.selectionEnd??a;i.value=i.value.slice(0,a)+ch+i.value.slice(b);i.focus();i.setSelectionRange(a+1,a+1)}
-function actions(){
-  const box=document.getElementById('actions');
-  if(cur.phase==='table'){box.innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;document.getElementById('chk').onclick=check;return}
+function checkSingle(choice){
+  if(cur.phase!=='ask')return;
+  const c=cur.c;let input=choice;
+  if(input===undefined){const a=$('ans');input=a.value;a.readOnly=true}
+  const acc=c.type==='item'?c.a:c.acc;
+  const r=judgeList(input,acc,c.half);
+  cur.errors=r;cur.phase='checked';
+  const cls=r===0?'ok':r<1?'warn':'bad';
+  if(c.o){app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(acc.includes(b.dataset.o))b.classList.add('ok');else if(b.dataset.o===input)b.classList.add('bad')})}
+  else{$('ans').className=cls;
+    const shown=c.type==='vocab'?c.fr:c.type==='pair'?c.fr:acc[0];
+    $('fix').innerHTML=r===0?'':`<p class="res ${cls}" style="margin:8px 0 0">${r<1?'Fast – richtig ist':'Richtig ist'}: <b lang="fr">${esc(shown)}</b></p>`;}
+  const msg=r===0?'✓ Richtig':r<1?(c.half&&c.half.includes(input)?'~ Fast: Zusammenziehung beachten':'~ Fast: Akzent beachten'):'✗ Falsch';
+  let why=c.w||'';
+  if(c.type==='vocab'&&r>0)why=`${esc(c.fr)} = ${esc(c.de)}`;
+  if(c.type==='pair')why=r>0?`<b lang="fr">${esc(c.fr)}</b> – ${esc(c.de)}`:'';
+  if(LINK[cur.id]&&r>0&&!S.session.exam){const L=card(LINK[cur.id]);L.due=Math.min(L.due||0,Date.now())}
+  showGrades(r===0?2:r<1?2:0,`<span class="res ${cls}">${msg}</span>`,why);
 }
-function check(){
-  const {v}=cur,c=card(v.fr);let sum=cur.infErr,right=0;
-  v.forms.forEach((f,i)=>{
-    const inp=document.getElementById('f'+i),r=judge(inp.value,f),cls=r===0?'ok':r<1?'warn':'bad';
-    inp.className=cls;inp.readOnly=true;sum+=r;if(r===0)right++;if(r)c.err[i]++;
-    inp.nextElementSibling.textContent=r===0?'✓':r<1?'~':'✗';
-    const x=document.getElementById('x'+i);x.className='fix '+cls;
-    x.textContent=r===0?'':(r<1?'Akzent: ':'Richtig: ')+f.replace('/',' oder ');
-  });
-  cur.errors=sum;cur.phase='checked';
-  const sug=sum===0?2:sum<=.5?2:sum<=2?1:0;cur.sug=sug;
+function showGrades(sug,msg,why){
+  const s=S.session;
+  if(s.exam){
+    $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}<button class="btn primary" id="go">Weiter</button>`;
+    $('go').onclick=()=>examNext();$('go').focus();return;
+  }
+  if(sug===null)sug=2;
+  cur.sug=sug;
   const names=['Nochmals','Schwer','Gut','Einfach'];
-  document.getElementById('actions').innerHTML=`<p class="result" role="status">${right} von ${v.forms.length} richtig${cur.infErr?' · Infinitiv falsch':''}</p>
-  <div class="grades">${names.map((n,g)=>`<button class="btn ${g===sug?'primary':''}" data-g="${g}">${n}<small>${preview(v.fr,g)}</small></button>`).join('')}</div>
+  $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}
+  <div class="grades">${names.map((n,g)=>`<button class="btn ${g===sug?'primary':''}" data-g="${g}">${n}<small>${preview(cur.id,g)}</small></button>`).join('')}</div>
   <p class="hint">Enter wählt den Vorschlag, Tasten 1–4 wählen direkt.</p>`;
   app.querySelectorAll('.grades .btn').forEach(b=>b.onclick=()=>grade(+b.dataset.g));
   app.querySelector('.grades .primary').focus();
+  cur.phase='checked';
 }
+function examNext(){
+  if(cur.phase==='done')return;
+  const s=S.session,c=cur.c;
+  const max=c.type==='verb'?c.v.forms.length+(cur.dir==='de'?1:0):1;
+  const lost=Math.min(max,cur.errors);
+  s.max+=max;s.pts+=max-lost;
+  if(lost>0){s.weak[c.topic]=(s.weak[c.topic]||0)+1;const k=card(cur.id);k.due=Math.min(k.due||0,Date.now())}
+  s.queue.shift();s.done++;cur.phase='done';save();next_();
+}
+
+// ----- Verben -----
+function renderVerb(){
+  const {c,dir}=cur,v=c.v,k=card(cur.id);
+  app.innerHTML=frame(`Présent · ${dir==='de'?'Deutsch → Französisch':'Französisch'}`,`<h1 class="word" lang="${dir==='de'?'de':'fr'}">${dir==='de'?v.de:v.fr}</h1>`,
+  `<section class="card" id="table" ${cur.phase==='inf'?'hidden':''} lang="fr">
+    ${v.forms.map((f,i)=>`<div class="line ${v.forms.length>1&&k.err[i]>=2?'weak':''}"><label class="pr" for="f${i}">${pron(v,i)}</label><input type="text" id="f${i}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${i===v.forms.length-1?'done':'next'}"><span class="mark" aria-hidden="true"></span></div><div class="fix" id="x${i}" aria-live="polite"></div>`).join('')}
+    ${v.forms.length>1&&k.err.some(e=>e>=2)?'<p class="weaknote">• Hier hattest du schon öfter Fehler.</p>':''}
+  </section>`)+ACC;
+  wire();
+  app.querySelectorAll('#table input').forEach((inp,i,all)=>inp.onkeydown=e=>{if(e.key!=='Enter'||cur.phase!=='table')return;e.preventDefault();e.stopPropagation();const n=[...all].slice(i+1).find(x=>!x.value)||[...all].find(x=>!x.value);n?n.focus():checkVerb()});
+  if(cur.phase==='inf'){
+    const box=$('inf');
+    box.innerHTML=`<div class="inf">${INPUT('infIn','Infinitiv auf Französisch','next')}<button class="btn primary" id="infGo">Weiter</button></div>`;
+    const inp=$('infIn');inp.focus();
+    const go=()=>{const r=judge(inp.value,v.fr);cur.infErr=r;cur.phase='table';
+      box.innerHTML=`<p class="result res ${r===0?'ok':r<1?'warn':'bad'}" style="margin-top:12px">${r===0?'✓':r<1?'~':'✗'} ${v.fr}${r?` <span style="font-weight:400">(du: ${esc(inp.value)||'–'})</span>`:''}</p>`;
+      $('table').hidden=false;$('f0').focus();verbActions()};
+    $('infGo').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();go()}};
+  }else{cur.phase='table';$('f0').focus();verbActions()}
+}
+function verbActions(){$('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;$('chk').onclick=checkVerb}
+function checkVerb(){
+  if(cur.phase!=='table')return;
+  const v=cur.c.v,k=card(cur.id);let sum=cur.infErr,right=0;
+  v.forms.forEach((f,i)=>{
+    const inp=$('f'+i),r=judge(inp.value,f),cls=r===0?'ok':r<1?'warn':'bad';
+    inp.className=cls;inp.readOnly=true;sum+=r;if(r===0)right++;if(r&&!S.session.exam)k.err[i]++;
+    inp.nextElementSibling.textContent=r===0?'✓':r<1?'~':'✗';
+    const x=$('x'+i);x.className='fix '+cls;
+    x.textContent=r===0?'':(r<1?'Akzent: ':'Richtig: ')+f.replace('/',' oder ');
+  });
+  cur.errors=sum;cur.phase='checked';
+  const why=sum>0&&v.like?`Tipp: <b lang="fr">${v.fr}</b> wird konjugiert wie <b lang="fr">${v.like}</b>.`:'';
+  showGrades(sum<=.5?2:sum<=2?1:0,`${right} von ${v.forms.length} richtig${cur.infErr?' · Infinitiv falsch':''}`,why);
+}
+
+let last=null;document.addEventListener('focusin',e=>{if(e.target.matches('input[type=text]'))last=e.target});
+function insert(ch){const i=last;if(!i||i.readOnly)return;const a=i.selectionStart??i.value.length,b=i.selectionEnd??a;i.value=i.value.slice(0,a)+ch+i.value.slice(b);i.focus();i.setSelectionRange(a+1,a+1)}
 document.addEventListener('keydown',e=>{
-  if(!cur||cur.phase!=='checked'||!S.session)return;
+  if(!cur||!S.session)return;
+  if(cur.phase==='ask'&&cur.c.o&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
+  if(cur.phase!=='checked'||S.session.exam)return;
   if(e.key==='Enter'){e.preventDefault();grade(cur.sug)}
   else if('1234'.includes(e.key)&&e.key.length===1){grade(+e.key-1)}
 });
 function grade(g){
-  const s=S.session,fr=cur.v.fr;cur.phase='done';
-  schedule(fr,g,s.mode);s.queue.shift();
-  if(g===0)s.queue.splice(Math.min(3,s.queue.length),0,fr);        // in ca. 1 Minute nochmals
-  else if(s.mode==='all'&&cur.errors>=1)s.queue.push(fr);           // am Ende der Runde nochmals
+  if(cur.phase!=='checked')return;
+  const s=S.session,id=cur.id;cur.phase='done';
+  schedule(id,g,s.mode);s.queue.shift();
+  if(g===0)s.queue.splice(Math.min(3,s.queue.length),0,id);        // in ca. 1 Minute nochmals
+  else if(s.mode==='all'&&cur.errors>=1)s.queue.push(id);           // am Ende der Runde nochmals
   else s.done++;
   save();next_();
 }
-function done(t){
+function done(s){
   cur=null;
-  app.innerHTML=`<h1>Runde fertig</h1><p class="sub">${t?`Du hast alle ${t} Verben dieser Runde richtig konjugiert.`:'Keine Verben in dieser Runde.'}</p><button class="btn primary" id="back">Zur Übersicht</button>`;
-  document.getElementById('back').onclick=home;document.getElementById('back').focus();
+  if(s&&s.exam){
+    const note=s.max?Math.round((5*s.pts/s.max+1)*2)/2:1;
+    const weak=Object.entries(s.weak).sort((a,b)=>b[1]-a[1]);
+    app.innerHTML=`<h1>Prüfung fertig</h1><p class="sub">${Math.round(s.pts*10)/10} von ${s.max} Punkten</p>
+    <section class="card"><div class="tense">Note</div><p class="big">${note.toFixed(1)}</p></section>
+    ${weak.length?`<h2>Das solltest du noch üben</h2>${weak.map(([t,n])=>`<div class="topic"><a class="name" href="#t-${t}"><b>${TOP[t].title}</b><span>${n} Fehler</span></a></div>`).join('')}<p class="hint">Falsch beantwortete Aufgaben sind jetzt fällig und kommen beim nächsten Lernen dran.</p>`:'<p>Keine Fehler. Stark!</p>'}
+    <button class="btn primary" id="back">Zur Übersicht</button>`;
+  }else{
+    app.innerHTML=`<h1>Runde fertig</h1><p class="sub">${s?`Du hast alle ${s.total} Aufgaben dieser Runde richtig gelöst.`:'Keine Aufgaben in dieser Runde.'}</p><button class="btn primary" id="back">Zur Übersicht</button>`;
+  }
+  $('back').onclick=()=>{location.hash='';home()};$('back').focus();
 }
-// ---------- Datenschutz (Schweiz: Art. 19 DSG, Art. 45c FMG) ----------
+
+// ===================== DATENSCHUTZ (Schweiz: Art. 19 DSG, Art. 45c FMG) =====================
 const LEGAL={
 datenschutz:`<h1>Datenschutz</h1>
 <h2>Verantwortlich</h2>
 <p>${OWNER.name}, E-Mail: ${OWNER.email}</p>
 <h2>Speicherung in deinem Browser</h2>
-<p>Die Seite speichert deine Verbauswahl, die Abfragerichtung und deinen Lernstand im Local Storage deines Browsers, damit der Wiederholungsplan funktioniert. Diese Daten bleiben auf deinem Gerät und werden nicht an mich oder Dritte übertragen. Es gibt keine Cookies, kein Tracking und keine Inhalte von Drittanbietern.</p>
+<p>Die Seite speichert deine Auswahl, die Abfragerichtung und deinen Lernstand im Local Storage deines Browsers, damit der Wiederholungsplan funktioniert. Diese Daten bleiben auf deinem Gerät und werden nicht an mich oder Dritte übertragen. Es gibt keine Cookies, kein Tracking und keine Inhalte von Drittanbietern.</p>
 <p>Du kannst diese Speicherung ablehnen oder die Daten löschen: mit «Fortschritt zurücksetzen» auf der Startseite oder indem du die Websitedaten in deinem Browser löschst bzw. sperrst. Der Trainer merkt sich dann deinen Fortschritt nicht mehr.</p>
 <h2>Hosting</h2>
 <p>Die Seite wird von ${OWNER.host} (${OWNER.hostCountry}) bereitgestellt. Beim Aufruf verarbeitet der Anbieter technisch notwendige Daten wie deine IP-Adresse, um die Seite auszuliefern und vor Missbrauch zu schützen.</p>
 <h2>Deine Rechte</h2>
 <p>Du kannst jederzeit per E-Mail Auskunft über deine Daten verlangen oder ihrer Bearbeitung widersprechen.</p>`};
-function legal(k){cur=null;app.innerHTML=`<a href="#" class="link" style="display:inline-block">‹ Zurück</a><article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
-function route(){const k=location.hash.slice(1);LEGAL[k]?legal(k):home()}
+function legal(k){cur=null;app.innerHTML=`<a href="#" class="link">‹ Zurück</a><article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
+function route(){
+  const k=location.hash.slice(1);
+  if(LEGAL[k])return legal(k);
+  if(k.startsWith('t-')&&TOP[k.slice(2)])return topicPage(k.slice(2));
+  home();
+}
 addEventListener('hashchange',route);
 route();
 </script>
