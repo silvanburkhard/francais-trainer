@@ -805,10 +805,12 @@ const TOPICS=[
  {id:'poss',group:'Grammatik',title:'Pronoms possessifs',sub:'le mien, la tienne …'},
 ];
 const TOP=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+// «Nur Präposition» gilt nur bei Auswahl und Karteikarte; beim Tippen schreibt man immer den ganzen Ausdruck
+const PREPMODE=()=>S.opt.compMode==='prep'&&S.opt.answer!=='type';
 function cardsOf(tid){
   if(!tid)return TOPICS.flatMap(t=>cardsOf(t.id));
   if(tid==='verbs')return S.sel.filter(f=>BY[f]).map(f=>'v:'+f);
-  const prep=S.opt.compMode==='prep'; // Compléments: je nach Abfrage die ganzen Ausdrücke oder die Präpositions-Karten
+  const prep=PREPMODE(); // Compléments: je nach Abfrage die ganzen Ausdrücke oder die Präpositions-Karten
   return Object.keys(CARDS).filter(id=>CARDS[id].topic===tid&&!(CARDS[id].type==='pair'&&!!CARDS[id].prep!==prep));
 }
 
@@ -923,7 +925,7 @@ function topicPage(tid){
   let extra='';
   if(tid==='comp')extra=`<p>Im Französischen braucht ein Verb oft eine andere Ergänzung als im Deutschen. Die Listen aus dem Cahier:</p>`
     +PAIR_GROUPS.map(([g,title,note])=>{const rows=PAIR_RAW.split('\n').filter(l=>l.split('|')[0]===g);
-      return`<details><summary>${g.replace(/[ab]/,'')}. ${title}${prog(rows.map(l=>(S.opt.compMode==='prep'?'q:':'p:')+l.split('|')[1]))}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${rows.map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`}).join('')
+      return`<details><summary>${g.replace(/[ab]/,'')}. ${title}${prog(rows.map(l=>(PREPMODE()?'q:':'p:')+l.split('|')[1]))}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${rows.map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`}).join('')
     +`<div class="note" style="margin-top:12px">Zusammenziehungen: à + le = <b>au</b> · à + les = <b>aux</b> · de + le = <b>du</b> · de + les = <b>des</b> · vor Vokal: <b>d'</b></div>`;
   const verbSel=tid!=='verbs'?'':`<section class="section"><div class="row-head" style="margin-top:0"><h2>Verben auswählen</h2><span><button class="link" id="selAll">Alle</button><button class="link" id="selNone">Keine</button></span></div>
     <div class="card"><div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:LEARNW(),sure:SURE()}[st];
@@ -934,7 +936,7 @@ function topicPage(tid){
   <section class="section"><h2>Fortschritt</h2><div class="card">${prog(ids,true)}${c.due?`<p class="duehint">${c.due} von ${c.total} ${DUEW()}.</p>`:nextDue(ids)}</div>${LEGEND()}</section>
   <section class="section"><h2>${BOX()?'Lernkartei':FREE()?'Üben':'Lernen'}</h2>
     ${BOX()?boxStrip(ids,tid).replace('<p class="hint">','<p class="hint" style="margin:0 0 16px">'):''}
-    ${quickOpts(tid==='comp'?`<div class="qrow"><span class="qlbl">Abfrage</span>${seg('qcomp',[['full','Ganzer Ausdruck'],['prep','Nur Präposition']],S.opt.compMode,'Abfrage')}</div>`:'')}
+    ${quickOpts(tid==='comp'?`<div class="qrow"><span class="qlbl">Abfrage</span>${S.opt.answer==='type'?'<span class="hint" style="margin:0">Beim Tippen schreibst du immer den ganzen Ausdruck. «Nur Präposition» gibt es bei Karte und Auswahl.</span>':seg('qcomp',[['full','Ganzer Ausdruck'],['prep','Nur Präposition']],S.opt.compMode,'Abfrage')}</div>`:'')}
     ${FREE()?`<button class="btn primary" id="all" ${c.total?'':'disabled'}>Alle ${c.total} Karten üben</button>
     <button class="btn" id="learn" ${c.learn?'':'disabled'}>Nicht gewusste üben (${c.learn})</button>`
     :`<button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND(),c.due)} Karten)`:`Fällige lernen (${Math.min(ROUND(),c.due)} von ${c.due})`}</button>
@@ -1054,7 +1056,7 @@ function next_(){
   let dir=S.dir==='mix'?(Math.random()<.5?'de':'fr'):S.dir;
   if(c.type==='vocab'&&s.exam)dir='de';
   cur={id,c,dir,phase:'ask',infErr:0,errors:0};
-  if(c.type==='verb'&&dir==='de')cur.phase='inf';
+  if(c.type==='verb')cur.phase='inf'; // DE→FR: Infinitiv eintippen, FR→DE: Bedeutung eintippen, danach konjugieren
   render();
 }
 function frame(label,promptHtml,body){
@@ -1068,9 +1070,9 @@ const ACC=()=>!S.opt.accBar?'':`<div class="acc" aria-label="Akzente">${'é è �
 const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
 
 function render(){
-  if(cur.c.prep&&!S.session.exam)return renderPrep();
+  if(cur.c.prep&&!S.session.exam&&S.opt.answer!=='type')return renderPrep();
   if(S.opt.answer==='flip'&&!S.session.exam)return renderFlip();
-  if(S.opt.answer==='choice'&&!S.session.exam&&cur.c.type!=='verb')return renderChoice();
+  if(S.opt.answer==='choice'&&!S.session.exam)return cur.c.type==='verb'?renderVerbChoice():renderChoice();
   const {c,dir}=cur,t=TOP[c.topic].title;
   if(c.type==='verb')return renderVerb();
   if(c.type==='vocab'&&dir==='fr'){
@@ -1112,10 +1114,12 @@ function renderFlip(){
     else{fl='Deutsch';front=`<p class="word" lang="de">${de}</p>${c.type==='pair'?'<p class="qhint">Verb mit Ergänzung</p>':''}`;bl='Französisch';back=`<p class="word" lang="fr">${fr}</p><p class="qhint" lang="de">${de}</p>${forms(c)}`}
   }else if(c.type==='verb'){
     const v=c.v;
-    fl=dir==='de'?'Deutsch':'Infinitiv';
+    fl=dir==='de'?'Deutsch':'Französisch';
     front=dir==='de'?`<p class="word" lang="de">${esc(v.de)}</p><p class="qhint">Infinitiv und Présent</p>`:`<p class="word" lang="fr">${esc(v.fr)}</p><p class="qhint">Konjugiere im Présent</p>`;
-    bl='Présent';
-    back=`<p class="word sm" lang="fr">${esc(v.fr)}</p><p class="qhint">${esc(v.de)}${v.like?` · wie ${esc(v.like)}`:''}</p>
+    front=dir==='de'?front:`<p class="word" lang="fr">${esc(v.fr)}</p><p class="qhint">Was heisst das? Und wie geht es im Présent?</p>`;
+    bl=dir==='de'?'Infinitiv und Présent':'Bedeutung und Présent';
+    back=(dir==='de'?`<p class="word sm" lang="fr">${esc(v.fr)}</p><p class="qhint">${esc(v.de)}${v.like?` · wie ${esc(v.like)}`:''}</p>`
+      :`<p class="word sm" lang="de">${esc(v.de)}</p><p class="qhint" lang="fr">${esc(v.fr)}${v.like?` · wie ${esc(v.like)}`:''}</p>`)+`
       <table class="conj" lang="fr">${v.forms.map((f,i)=>`<tr><td>${pron(v,i)}</td><td><b>${esc(f.replace(/\//g,' / '))}</b></td></tr>`).join('')}</table>`;
   }else{
     const a=c.a[0];
@@ -1226,6 +1230,42 @@ function choicesFor(c,dir){
   if(dir==='fr')return{opts:pick(same.map(x=>x.de),c.de,3),acc:[c.de],lang:'de',wide:true};
   return{opts:pick(same.map(x=>x.fr),c.fr,3),acc:[c.fr],lang:'fr',wide:true};
 }
+function renderVerbChoice(){
+  const {c,dir}=cur,v=c.v,toDe=dir==='fr';
+  cur.phase='ask';cur.vstep=1;cur.errors=0;
+  const opts=shuffle([v,...shuffle(VERBS.filter(x=>x!==v&&x.de!==v.de)).slice(0,3)]);
+  const q=toDe?`<h1 class="word" lang="fr">${esc(v.fr)}</h1><p class="qhint">1. Was heisst das auf Deutsch?</p>`
+    :`<h1 class="word" lang="de">${esc(v.de)}</h1><p class="qhint">1. Welches Verb ist es?</p>`;
+  app.innerHTML=frame(`Présent · Auswählen · ${toDe?'Französisch → Deutsch':'Deutsch → Französisch'}`,q,
+    `<div class="opts wide" id="vo1">${opts.map(o=>`<button class="opt" data-o="${esc(o.fr)}" lang="${toDe?'de':'fr'}">${esc(toDe?o.de:o.fr)}</button>`).join('')}</div><div id="step2"></div>`);
+  wire();
+  $('vo1').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(cur.vstep!==1)return;cur.vstep=2;
+    if(b.dataset.o!==v.fr)cur.errors++;
+    $('vo1').querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.o===v.fr)x.classList.add('ok');else if(x===b)x.classList.add('bad')});
+    verbChoiceStep2()});
+  $('vo1').querySelector('.opt').focus();
+}
+function verbChoiceStep2(){
+  const v=cur.c.v;
+  if(v.forms.length===1)return finishVerbChoice(); // il faut, il pleut: nur eine Form
+  const i=Math.random()*6|0,first=f=>f.split('/')[0];
+  // Auswahl: die anderen Formen desselben Verbs (je/il sind oft gleich, darum ohne Doppelte)
+  const opts=shuffle([...new Set(v.forms.map(first))]);
+  $('step2').innerHTML=`<p class="qhint" style="margin-top:20px">2. Welche Form passt?</p><p class="word q" lang="fr">${esc(pron(v,i))} <span class="gap">&nbsp;</span> <span class="qhint" style="font-size:1rem">(${esc(v.fr)})</span></p>
+    <div class="opts" id="vo2">${opts.map(o=>`<button class="opt" data-o="${esc(o)}" lang="fr">${esc(o)}</button>`).join('')}</div>`;
+  $('vo2').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(cur.vstep!==2)return;cur.vstep=3;
+    const ok=v.forms[i].split('/').includes(b.dataset.o);if(!ok)cur.errors++;
+    $('vo2').querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(v.forms[i].split('/').includes(x.dataset.o))x.classList.add('ok');else if(x===b)x.classList.add('bad')});
+    finishVerbChoice()});
+  $('vo2').querySelector('.opt').focus();
+}
+function finishVerbChoice(){
+  const v=cur.c.v,e=cur.errors;
+  const why=`<b lang="fr">${esc(v.fr)}</b> – ${esc(v.de)}<table class="conj" lang="fr" style="margin-top:8px">${v.forms.map((f,i)=>`<tr><td>${pron(v,i)}</td><td><b>${esc(f.replace(/\//g,' / '))}</b></td></tr>`).join('')}</table>${v.like?`<span class="grp">Konjugiert wie ${esc(v.like)}.</span>`:''}`;
+  showGrades(e===0?2:e===1?1:0,`<span class="res ${e?'bad':'ok'}">${v.forms.length===1?(e?'✗ Falsch':'✓ Richtig'):e===0?'✓ Beides richtig':e===1?'✗ Ein Fehler':'✗ Zwei Fehler'}</span>`,why);
+}
 function renderChoice(){
   const {c,dir}=cur,t=TOP[c.topic].title;
   const ch=cur.ch=choicesFor(c,dir);cur.phase='ask';
@@ -1309,7 +1349,7 @@ function showGrades(sug,msg,why){
 function examNext(){
   if(cur.phase==='done')return;
   const s=S.session,c=cur.c;
-  const max=c.type==='verb'?c.v.forms.length+(cur.dir==='de'?1:0):1;
+  const max=c.type==='verb'?c.v.forms.length+1:1;
   const lost=Math.min(max,cur.errors);
   s.max+=max;s.pts+=max-lost;
   if(lost>0){s.weak[c.topic]=(s.weak[c.topic]||0)+1;if(BOX())S.box[cur.id]=1;if(FREE())S.free[cur.id]=0;const k=card(cur.id);k.due=Math.min(k.due||0,Date.now())}
@@ -1319,7 +1359,7 @@ function examNext(){
 // ----- Verben -----
 function renderVerb(){
   const {c,dir}=cur,v=c.v,k=card(cur.id);
-  app.innerHTML=frame(`Présent · ${dir==='de'?'Deutsch → Französisch':'Französisch'}`,`<h1 class="word" lang="${dir==='de'?'de':'fr'}">${dir==='de'?v.de:v.fr}</h1>`,
+  app.innerHTML=frame(`Présent · ${dir==='de'?'Deutsch → Französisch':'Französisch → Deutsch'}`,`<h1 class="word" lang="${dir==='de'?'de':'fr'}">${dir==='de'?v.de:v.fr}</h1>`,
   `<section class="card" id="table" ${cur.phase==='inf'?'hidden':''} lang="fr">
     ${v.forms.map((f,i)=>`<div class="line ${v.forms.length>1&&k.err[i]>=2?'weak':''}"><label class="pr" for="f${i}">${pron(v,i)}</label><input type="text" id="f${i}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${i===v.forms.length-1?'done':'next'}"><span class="mark" aria-hidden="true"></span></div><div class="fix" id="x${i}" aria-live="polite"></div>`).join('')}
     ${v.forms.length>1&&k.err.some(e=>e>=2)?'<p class="weaknote">• Hier hattest du schon öfter Fehler.</p>':''}
@@ -1328,14 +1368,17 @@ function renderVerb(){
   app.querySelectorAll('#table input').forEach((inp,i,all)=>inp.onkeydown=e=>{if(e.key!=='Enter'||cur.phase!=='table')return;e.preventDefault();e.stopPropagation();const n=[...all].slice(i+1).find(x=>!x.value)||[...all].find(x=>!x.value);n?n.focus():checkVerb()});
   if(cur.phase==='inf'){
     const box=$('inf');
-    box.innerHTML=`<div class="inf">${INPUT('infIn','Infinitiv auf Französisch','next')}<button class="btn primary" id="infGo">Weiter</button></div>`;
+    const toDe=dir==='fr';
+    box.innerHTML=`<div class="inf">${INPUT('infIn',toDe?'Bedeutung auf Deutsch':'Infinitiv auf Französisch','next').replace('lang="fr"',toDe?'lang="de"':'lang="fr"')}<button class="btn primary" id="infGo">Weiter</button></div>`;
     const inp=$('infIn');inp.focus();
-    const go=()=>{const r=judge(inp.value,v.fr);cur.infErr=r;cur.phase='table';
-      box.innerHTML=`<p class="result res ${r===0?'ok':r<1?'warn':'bad'}" style="margin-top:12px">${r===0?'✓':r<1?'~':'✗'} ${v.fr}${r?` <span style="font-weight:400">(du: ${esc(inp.value)||'–'})</span>`:''}</p>`;
+    const go=()=>{const r=toDe?judgeList(inp.value,deAlts(v.de)):judge(inp.value,v.fr);cur.infErr=r;cur.phase='table';
+      box.innerHTML=`<p class="result res ${r===0?'ok':r<1?'warn':'bad'}" style="margin-top:12px">${r===0?'✓':r<1?'~':'✗'} ${esc(toDe?v.de:v.fr)}${r?` <span style="font-weight:400">(du: ${esc(inp.value)||'–'})</span>`:''}</p>`;
       $('table').hidden=false;$('f0').focus();verbActions()};
     $('infGo').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();go()}};
   }else{cur.phase='table';$('f0').focus();verbActions()}
 }
+// Deutsche Bedeutungen: «bevorzugen, lieber mögen» → jede Variante zählt; Klammern wie «(Person, Ort)» sind freiwillig
+const deAlts=de=>de.split(/[,;/]/).map(x=>x.replace(/\([^)]*\)/g,'').trim()).filter(Boolean);
 function verbActions(){$('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;$('chk').onclick=checkVerb}
 function checkVerb(){
   if(cur.phase!=='table')return;
@@ -1349,7 +1392,7 @@ function checkVerb(){
   });
   cur.errors=sum;cur.phase='checked';
   const why=sum>0&&v.like?`Tipp: <b lang="fr">${v.fr}</b> wird konjugiert wie <b lang="fr">${v.like}</b>.`:'';
-  showGrades(sum<=.5?2:sum<=2?1:0,`${right} von ${v.forms.length} richtig${cur.infErr?' · Infinitiv falsch':''}`,why);
+  showGrades(sum<=.5?2:sum<=2?1:0,`${right} von ${v.forms.length} richtig${cur.infErr>.5?(cur.dir==='fr'?' · Bedeutung falsch':' · Infinitiv falsch'):''}`,why);
 }
 
 let last=null;document.addEventListener('focusin',e=>{if(e.target.matches('input[type=text]'))last=e.target});
