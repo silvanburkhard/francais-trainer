@@ -92,6 +92,26 @@ button{font:inherit;color:inherit;cursor:pointer}
 .dot{display:inline-block;width:10px;height:10px;margin:0 6px 0 14px;vertical-align:-1px}
 .dot:first-child{margin-left:0}
 .dot.s{background:var(--text)}.dot.l{background:var(--learn)}.dot.n{background:var(--line)}
+/* Karteikarte */
+.flip{perspective:1400px;margin:0 0 20px;cursor:pointer;outline:none}
+.flip.on{cursor:default}
+.flip:focus-visible .face{outline:3px solid var(--text);outline-offset:3px}
+.flip-in{display:grid;transition:transform .5s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{grid-area:1/1;min-height:300px;display:flex;flex-direction:column;gap:8px;padding:20px 24px 24px;border:1.5px solid var(--text);background:var(--bg);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face>div{margin:auto 0}
+.face .word{margin:0}
+.face.back{transform:rotateY(180deg);background:var(--text);color:var(--bg)}
+.side{font-size:13px;font-weight:700;color:var(--muted)}
+.back .side,.back .qhint{color:var(--bg);opacity:.75}
+.turn{font-size:14px;color:var(--muted);min-height:1em}
+.back .why{border-color:var(--bg);margin:16px 0 0}
+.word.sm{font-size:28px}
+.fill{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+.conj{border-collapse:collapse;margin-top:12px;font-size:18px}
+.conj td{padding:5px 20px 5px 0;border-bottom:1px solid color-mix(in srgb,var(--bg) 25%,transparent)}
+.conj td:first-child{opacity:.75}
+@media (prefers-reduced-motion:reduce){.flip-in{transition:none}}
 /* Lernkartei */
 .boxes{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:4px}
 .boxbtn{display:flex;flex-direction:column;justify-content:space-between;gap:4px;min-height:76px;padding:8px 6px;border:1.5px solid var(--text);border-radius:0;background:transparent;color:var(--text);text-align:left}
@@ -729,7 +749,7 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box'},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type'},S.opt);
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
@@ -898,6 +918,7 @@ function settings(){
     <div class="setrow col"><div class="lbl"><b>So lernst du</b><span>${methodHint}</span></div>${seg('method',[['box','Lernkartei'],['plan','Wiederholungsplan']],o.method,'Lernmethode')}</div>
   </div></section>
   <section class="section"><h2>Abfrage</h2><div class="group">
+    <div class="setrow col"><div class="lbl"><b>Antworten</b><span>${o.answer==='flip'?'Du siehst die Vorderseite, drehst die Karte um und sagst selbst, ob du es gewusst hast. Die Prüfung bleibt zum Eintippen.':'Du tippst die Antwort ein, und die Seite prüft sie.'}</span></div>${seg('answer',[['type','Eintippen'],['flip','Karteikarte']],o.answer,'Antworten')}</div>
     <div class="setrow col"><div class="lbl"><b>Richtung bei Verben und Vokabeln</b><span>${dirHint}</span></div>${seg('dir',[['de','Deutsch → Französisch'],['fr','Französisch → Deutsch'],['mix','Gemischt']],S.dir,'Abfragerichtung')}</div>
     <div class="setrow"><label class="lbl" for="strict"><b>Akzente streng bewerten</b><span>Ein fehlender oder falscher Akzent zählt als Fehler statt als «fast richtig».</span></label><input type="checkbox" class="toggle" id="strict" ${o.strict?'checked':''}></div>
   </div></section>
@@ -981,6 +1002,7 @@ const ACC=()=>!S.opt.accBar?'':`<div class="acc" aria-label="Akzente">${'é è �
 const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
 
 function render(){
+  if(S.opt.answer==='flip'&&!S.session.exam)return renderFlip();
   const {c,dir}=cur,t=TOP[c.topic].title;
   if(c.type==='verb')return renderVerb();
   if(c.type==='vocab'&&dir==='fr'){
@@ -1003,6 +1025,44 @@ function render(){
     else{$('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;$('chk').onclick=()=>checkSingle();$('ans').focus()}
   }
   wire();
+}
+// ----- Karteikarte mit Vorder- und Rückseite -----
+function renderFlip(){
+  const {c,dir}=cur,t=TOP[c.topic].title;
+  cur.flip=true;cur.phase='ask';
+  let fl,front,bl,back;
+  if(c.type==='vocab'||c.type==='pair'){
+    const de=esc(c.de),fr=esc(c.fr);
+    if(dir==='fr'){fl='Französisch';front=`<p class="word" lang="fr">${fr}</p>`;bl='Deutsch';back=`<p class="word" lang="de">${de}</p><p class="qhint" lang="fr">${fr}</p>`}
+    else{fl='Deutsch';front=`<p class="word" lang="de">${de}</p>${c.type==='pair'?'<p class="qhint">Verb mit Ergänzung</p>':''}`;bl='Französisch';back=`<p class="word" lang="fr">${fr}</p><p class="qhint" lang="de">${de}</p>`}
+  }else if(c.type==='verb'){
+    const v=c.v;
+    fl=dir==='de'?'Deutsch':'Infinitiv';
+    front=dir==='de'?`<p class="word" lang="de">${esc(v.de)}</p><p class="qhint">Infinitiv und Présent</p>`:`<p class="word" lang="fr">${esc(v.fr)}</p><p class="qhint">Konjugiere im Présent</p>`;
+    bl='Présent';
+    back=`<p class="word sm" lang="fr">${esc(v.fr)}</p><p class="qhint">${esc(v.de)}${v.like?` · wie ${esc(v.like)}`:''}</p>
+      <table class="conj" lang="fr">${v.forms.map((f,i)=>`<tr><td>${pron(v,i)}</td><td><b>${esc(f.replace(/\//g,' / '))}</b></td></tr>`).join('')}</table>`;
+  }else{
+    const a=c.a[0];
+    fl='Aufgabe';front=`<p class="word q" lang="fr">${gapify(c.q)}</p>${c.h?`<p class="qhint">${esc(c.h)}</p>`:''}`;
+    let sol;
+    if(!c.q.includes('___'))sol=`<p class="word q" lang="fr">${esc(c.q)}</p><p class="word sm"><b class="fill">${esc(a)}</b></p>`;
+    else if(a==='—')sol=`<p class="word q" lang="fr">${esc(c.q).replace(/\s*___\s*/,' ')}</p><p class="qhint">Keine Präposition</p>`;
+    else sol=`<p class="word q" lang="fr">${esc(c.q).replace('___',`<b class="fill">${esc(a)}</b>`)}</p>`;
+    bl='Lösung';back=sol+(c.w?`<div class="why">${c.w}</div>`:'');
+  }
+  app.innerHTML=frame(`${t} · Karteikarte`,'',`<div class="flip" id="flip" role="button" tabindex="0" aria-label="Karte umdrehen">
+    <div class="flip-in"><div class="face front"><span class="side">${fl}</span><div>${front}</div><span class="turn">Tippen oder Leertaste zum Umdrehen</span></div>
+    <div class="face back" aria-hidden="true"><span class="side">${bl}</span><div>${back}</div><span class="turn"></span></div></div></div>`);
+  wire();
+  $('actions').innerHTML=`<button class="btn primary" id="turn">Umdrehen</button>`;
+  $('flip').onclick=flipCard;$('turn').onclick=flipCard;$('flip').focus();
+}
+function flipCard(){
+  if(!cur||!cur.flip||cur.phase!=='ask')return;
+  const f=$('flip');f.classList.add('on');f.removeAttribute('role');f.removeAttribute('tabindex');f.removeAttribute('aria-label');
+  f.querySelector('.front').setAttribute('aria-hidden','true');f.querySelector('.back').removeAttribute('aria-hidden');
+  showGrades(null,'Wusstest du es?','');
 }
 function wire(){
   $('quit').onclick=()=>{location.hash='';home()};
@@ -1108,6 +1168,7 @@ let last=null;document.addEventListener('focusin',e=>{if(e.target.matches('input
 function insert(ch){const i=last;if(!i||i.readOnly)return;const a=i.selectionStart??i.value.length,b=i.selectionEnd??a;i.value=i.value.slice(0,a)+ch+i.value.slice(b);i.focus();i.setSelectionRange(a+1,a+1)}
 document.addEventListener('keydown',e=>{
   if(!cur||!S.session)return;
+  if(cur.flip&&cur.phase==='ask'&&(e.key===' '||e.key==='Enter')){e.preventDefault();flipCard();return}
   if(cur.phase==='ask'&&cur.c.o&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
   if(cur.phase!=='checked'||S.session.exam)return;
   if(S.session.mode==='box'){if(e.key==='Enter'){e.preventDefault();const b=app.querySelector('#actions .btn.primary');b&&b.click()}return}
