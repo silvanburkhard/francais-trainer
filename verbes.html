@@ -97,6 +97,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .dot{display:inline-block;width:10px;height:10px;margin:0 6px 0 14px;vertical-align:-1px}
 .dot:first-child{margin-left:0}
 .dot.s{background:var(--text)}.dot.l{background:var(--learn)}.dot.n{background:var(--line)}
+/* Formen m./w. */
+.forms{display:flex;flex-wrap:wrap;gap:4px 20px;margin:10px 0 0;font-size:1.0625rem}
+.forms .fl{color:var(--muted);font-size:.875rem;font-weight:700}
 /* Karteikarte */
 .flip{perspective:1400px;margin:0 0 20px;cursor:pointer;outline:none}
 .flip.on{cursor:default}
@@ -1065,7 +1068,7 @@ function render(){
     $('show').focus();
   }else if(c.type==='vocab'||c.type==='pair'){
     const lab=c.type==='vocab'?`${t} · Deutsch → Französisch`:`${t} · Verb mit Ergänzung`;
-    const hint=c.type==='vocab'?'Nomen mit Artikel':'z. B. «aider qn» oder «téléphoner à qn»';
+    const hint=c.type==='vocab'?(/^(le|la|les|un|une|des|l')[ ']/i.test(c.fr)||/^l'/i.test(c.fr)?'Nomen mit Artikel':forms(c)?'Die männliche Form genügt':''):'z. B. «aider qn» oder «téléphoner à qn»';
     app.innerHTML=frame(lab,`<h1 class="word" lang="de">${esc(c.de)}</h1><p class="qhint">${hint}</p>`,`<div class="answer card">${INPUT('ans','Auf Französisch')}<div id="fix"></div></div>`)+ACC();
     $('actions').innerHTML=`<button class="btn primary" id="chk">Prüfen</button>`;
     $('chk').onclick=()=>checkSingle();$('ans').focus();
@@ -1079,6 +1082,13 @@ function render(){
   wire();
 }
 // ----- Karteikarte mit Vorder- und Rückseite -----
+// Männliche und weibliche Form (bei «le mien …» alle vier) nebeneinander zeigen
+function forms(c){
+  if(c.type!=='vocab'||!c.fr.includes('/')||/\bq[cn]\b/.test(c.fr))return'';
+  const p=c.fr.split('/'),L=p.length===2?['männlich','weiblich']:p.length===4?['m. Sg.','w. Sg.','m. Pl.','w. Pl.']:null;
+  if(!L)return'';
+  return`<p class="forms">${p.map((x,i)=>`<span><span class="fl">${L[i]}</span> <b lang="fr">${esc(x.trim())}</b></span>`).join('')}</p>`;
+}
 function renderFlip(){
   const {c,dir}=cur,t=TOP[c.topic].title;
   cur.flip=true;cur.phase='ask';
@@ -1086,7 +1096,7 @@ function renderFlip(){
   if(c.type==='vocab'||c.type==='pair'){
     const de=esc(c.de),fr=esc(c.fr);
     if(dir==='fr'){fl='Französisch';front=`<p class="word" lang="fr">${fr}</p>`;bl='Deutsch';back=`<p class="word" lang="de">${de}</p><p class="qhint" lang="fr">${fr}</p>`}
-    else{fl='Deutsch';front=`<p class="word" lang="de">${de}</p>${c.type==='pair'?'<p class="qhint">Verb mit Ergänzung</p>':''}`;bl='Französisch';back=`<p class="word" lang="fr">${fr}</p><p class="qhint" lang="de">${de}</p>`}
+    else{fl='Deutsch';front=`<p class="word" lang="de">${de}</p>${c.type==='pair'?'<p class="qhint">Verb mit Ergänzung</p>':''}`;bl='Französisch';back=`<p class="word" lang="fr">${fr}</p><p class="qhint" lang="de">${de}</p>${forms(c)}`}
   }else if(c.type==='verb'){
     const v=c.v;
     fl=dir==='de'?'Deutsch':'Infinitiv';
@@ -1131,8 +1141,8 @@ function checkSingle(choice){
   const cls=r===0?'ok':r<1?'warn':'bad';
   if(c.o){app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(acc.includes(b.dataset.o))b.classList.add('ok');else if(b.dataset.o===input)b.classList.add('bad')})}
   else{$('ans').className=cls;
-    const shown=c.type==='vocab'?c.fr:c.type==='pair'?c.fr:acc[0];
-    $('fix').innerHTML=r===0?'':`<p class="res ${cls}" style="margin:8px 0 0">${r<1?'Fast – richtig ist':'Richtig ist'}: <b lang="fr">${esc(shown)}</b></p>`;}
+    const shown=c.type==='vocab'?c.fr:c.type==='pair'?c.fr:acc[0],fm=forms(c);
+    $('fix').innerHTML=r===0?fm:`<p class="res ${cls}" style="margin:8px 0 0">${r<1?'Fast – richtig ist':'Richtig ist'}:${fm?'':` <b lang="fr">${esc(shown)}</b>`}</p>${fm}`;}
   const msg=r===0?'✓ Richtig':r<1?(c.half&&c.half.includes(input)?'~ Fast: Zusammenziehung beachten':'~ Fast: Akzent beachten'):'✗ Falsch';
   let why=c.w||'';
   if(c.type==='vocab'&&r>0)why=`${esc(c.fr)} = ${esc(c.de)}`;
