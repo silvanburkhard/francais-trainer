@@ -984,7 +984,7 @@ function start(mode,tid,fach){
   if(mode==='due')ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity)); // Wiederholungen zuerst
   if(!ids.length)return;
   S.session={mode,topic:tid,queue:ids,total:ids.length,done:0};save();
-  if(location.hash){history.replaceState(null,'',location.pathname+location.search)}
+  if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
   next_();
 }
 function boxStart(mode,tid,fach){
@@ -996,7 +996,7 @@ function boxStart(mode,tid,fach){
   if(mode==='due'&&fach===undefined)ids=ids.slice(0,ROUND);
   if(!ids.length)return;
   S.session={mode:'box',topic:tid,queue:ids,total:ids.length,done:0,seen:{}};save();
-  if(location.hash){history.replaceState(null,'',location.pathname+location.search)}
+  if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
   next_();
 }
 // Ziel-Fach: richtig → +1, nur Akzent/Kleinigkeit → bleibt, falsch → Fach 1.
@@ -1012,7 +1012,7 @@ function freeStart(mode,tid){
   if(mode==='due')ids=ids.filter(id=>S.free[id]===0);
   ids=shuffle(ids);if(!ids.length)return;
   S.session={mode:'free',topic:tid,queue:ids,total:ids.length,done:0,seen:{}};save();
-  if(location.hash){history.replaceState(null,'',location.pathname+location.search)}
+  if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
   next_();
 }
 function freeNext(err){
@@ -1126,8 +1126,14 @@ function flipCard(){
   f.querySelector('.front').setAttribute('aria-hidden','true');f.querySelector('.back').removeAttribute('aria-hidden');
   showGrades(null,'Wusstest du es?','');
 }
+// Nach dem Üben zurück zur Seite, von der man kam: Thema oder Startseite
+function leaveTo(t){
+  cur=null;const ok=t&&TOP[t];
+  try{history.replaceState(null,'',ok?'#t-'+t:location.pathname+location.search)}catch(e){}
+  ok?topicPage(t):home();scrollTo(0,0);
+}
 function wire(){
-  $('quit').onclick=()=>{location.hash='';home()};
+  $('quit').onclick=()=>leaveTo(S.session&&S.session.topic);
   app.querySelectorAll('.acc button').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>insert(b.dataset.a)});
   const a=$('ans');if(a)a.onkeydown=e=>{if(e.key==='Enter'&&cur.phase==='ask'){e.preventDefault();e.stopPropagation();checkSingle()}};
 }
@@ -1257,9 +1263,9 @@ function done(s){
     ${weak.length?`<h2>Das solltest du noch üben</h2>${weak.map(([t,n])=>`<div class="topic"><a class="name" href="#t-${t}"><b>${TOP[t].title}</b><span>${n} Fehler</span></a></div>`).join('')}<p class="hint">Falsch beantwortete Fragen kommen beim nächsten Lernen wieder dran.</p>`:'<p>Keine Fehler. Stark!</p>'}
     <button class="btn primary" id="back">Zur Übersicht</button>`;
   }else{
-    app.innerHTML=`<h1>Runde geschafft</h1><p class="sub">${s?`Du hast alle ${s.total} Karten dieser Runde durchgearbeitet.`:'In dieser Runde waren keine Karten.'}</p><button class="btn primary" id="back">Zur Übersicht</button>`;
+    app.innerHTML=`<h1>Runde geschafft</h1><p class="sub">${s?`Du hast alle ${s.total} Karten dieser Runde durchgearbeitet.`:'In dieser Runde waren keine Karten.'}</p><button class="btn primary" id="back">${s&&TOP[s.topic]?`Zurück zu ${TOP[s.topic].title}`:'Zur Übersicht'}</button>`;
   }
-  $('back').onclick=()=>{location.hash='';home()};$('back').focus();
+  $('back').onclick=()=>leaveTo(s&&s.topic);$('back').focus();
 }
 
 // ===================== DATENSCHUTZ (Schweiz: Art. 19 DSG, Art. 45c FMG) =====================
