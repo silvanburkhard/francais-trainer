@@ -785,7 +785,7 @@ const isDue=id=>FREE()?S.free[id]!==1:BOX()?boxOf(id)<5:(!S.cards[id]||S.cards[i
 const SURE=()=>FREE()?'gewusst':BOX()?'gelernt':'sicher';
 const LEARNW=()=>FREE()?'nicht gewusst':'am Lernen';
 const DUEW=()=>BOX()||FREE()?'offen':'fällig';
-const ROUND=20; // Karten pro Lernkartei-Runde
+const ROUND=()=>S.opt.examLen; // Karten pro Runde (Einstellung «Fragen pro Runde»)
 
 const TOPICS=[
  {id:'vocab',group:'Wortschatz',title:'Vocabulaire',sub:'Dossier 5 · S. 183–188'},
@@ -897,7 +897,7 @@ function home(){
     ${s?`<button class="btn primary" id="resume">${s.exam?'Prüfung':'Runde'} fortsetzen (${s.done} / ${s.total})</button>`:''}
     ${FREE()?`<button class="btn ${s?'':'primary'}" id="freeAll">Alle ${k.total} Karten üben</button>
     <button class="btn" id="due" ${k.learn?'':'disabled'}>Nicht gewusste üben (${k.learn})</button>`
-    :`<button class="btn ${s?'':'primary'}" id="due" ${k.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,k.due)} Karten)`:`Alles Fällige lernen (${k.due})`}</button>`}
+    :`<button class="btn ${s?'':'primary'}" id="due" ${k.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND(),k.due)} Karten)`:`Fällige lernen (${Math.min(ROUND(),k.due)} von ${k.due})`}</button>`}
     <button class="btn" id="exam">Prüfung starten (${S.opt.examLen} Fragen)</button>
   </section>
   ${BOX()?'':`<section class="section"><h2>Gesamtfortschritt</h2><div class="card">${prog(all,true)}</div>${LEGEND()}</section>`}
@@ -928,7 +928,7 @@ function topicPage(tid){
     ${quickOpts()}
     ${FREE()?`<button class="btn primary" id="all" ${c.total?'':'disabled'}>Alle ${c.total} Karten üben</button>
     <button class="btn" id="learn" ${c.learn?'':'disabled'}>Nicht gewusste üben (${c.learn})</button>`
-    :`<button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,c.due)} Karten)`:`Fällige lernen (${c.due})`}</button>
+    :`<button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND(),c.due)} Karten)`:`Fällige lernen (${Math.min(ROUND(),c.due)} von ${c.due})`}</button>
     <button class="btn" id="all" ${c.total?'':'disabled'}>Alle ${c.total} durchgehen</button>`}
     <p class="hint">${FREE()?'Die Karten kommen in zufälliger Reihenfolge. Was du nicht weisst, kommt in derselben Runde nochmals.':BOX()?'«Alle durchgehen» nimmt jede Karte einmal dran, auch die aus Fach 5.':'«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.'}</p>
   </section>
@@ -959,8 +959,8 @@ function settings(){
   <section class="section"><h2>Abfrage</h2><div class="group">
     <div class="setrow"><label class="lbl" for="strict"><b>Akzente streng bewerten</b><span>Ein fehlender oder falscher Akzent zählt als Fehler statt als «fast richtig».</span></label><input type="checkbox" class="toggle" id="strict" ${o.strict?'checked':''}></div>
   </div><p class="hint">Richtung und Antwortart (Eintippen oder Karteikarte) stellst du direkt über dem Lernen-Knopf um.</p></section>
-  <section class="section"><h2>Prüfung</h2><div class="group">
-    <div class="setrow col"><div class="lbl"><b>Anzahl Fragen</b><span>Die Fragen werden gleichmässig auf alle Themen verteilt.</span></div>${seg('examLen',[[10,'10'],[20,'20'],[30,'30'],[50,'50']],o.examLen,'Anzahl Fragen')}</div>
+  <section class="section"><h2>Runden</h2><div class="group">
+    <div class="setrow col"><div class="lbl"><b>Fragen pro Runde</b><span>Gilt für «Lernkartei üben», «Fällige lernen» und die Prüfung. In der Prüfung werden die Fragen gleichmässig auf alle Themen verteilt. «Alle durchgehen» nimmt immer alle Karten.</span></div>${seg('examLen',[[10,'10'],[20,'20'],[30,'30'],[50,'50']],o.examLen,'Fragen pro Runde')}</div>
   </div></section>
   <section class="section"><h2>Darstellung</h2><div class="group">
     <div class="setrow"><label class="lbl" for="accBar"><b>Akzentleiste anzeigen</b><span>Tasten für é, è, ç … unten am Bildschirm.</span></label><input type="checkbox" class="toggle" id="accBar" ${o.accBar?'checked':''}></div>
@@ -981,7 +981,7 @@ function start(mode,tid,fach){
   if(FREE())return freeStart(mode,tid);
   if(BOX())return boxStart(mode,tid,fach);
   let ids=shuffle(cardsOf(tid).filter(id=>mode==='all'||isDue(id)));
-  if(mode==='due')ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity)); // Wiederholungen zuerst
+  if(mode==='due'){ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity));ids=ids.slice(0,ROUND())} // Wiederholungen zuerst
   if(!ids.length)return;
   S.session={mode,topic:tid,queue:ids,total:ids.length,done:0};save();
   if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
@@ -993,7 +993,7 @@ function boxStart(mode,tid,fach){
   else if(mode==='due')ids=ids.filter(id=>boxOf(id)<5);
   const order=[1,0,2,3,4,5]; // zuerst Fach 1, dann neue Karten, dann die höheren Fächer
   ids=shuffle(ids).sort((a,b)=>order.indexOf(Math.min(5,boxOf(a)))-order.indexOf(Math.min(5,boxOf(b))));
-  if(mode==='due'&&fach===undefined)ids=ids.slice(0,ROUND);
+  if(mode==='due'&&fach===undefined)ids=ids.slice(0,ROUND());
   if(!ids.length)return;
   S.session={mode:'box',topic:tid,queue:ids,total:ids.length,done:0,seen:{}};save();
   if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
