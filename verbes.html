@@ -1015,20 +1015,22 @@ function freeStart(mode,tid){
   if(location.hash){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
   next_();
 }
-function freeNext(err){
+// Antwort sofort in der Lernkartei bzw. im freien Üben vermerken (schon beim Prüfen, nicht erst bei «Weiter»)
+function applyAnswer(err){
+  if(cur.applied)return;
+  const s=S.session,id=cur.id;
+  if(s.mode==='box')S.box[id]=boxTarget(err);
+  else if(!s.seen[id])S.free[id]=err<=.5?1:0;
+  s.seen[id]=1;cur.applied=true;save();
+}
+function nextCard(err){
   if(cur.phase!=='checked')return;
-  const s=S.session,id=cur.id;cur.phase='done';
-  if(!s.seen[id])S.free[id]=err<=.5?1:0;s.seen[id]=1;s.queue.shift();
+  applyAnswer(err);
+  const s=S.session,id=cur.id;cur.phase='done';s.queue.shift();
   if(err>.5)s.queue.push(id);else s.done++;
   save();next_();
 }
-function boxNext(err){
-  if(cur.phase!=='checked')return;
-  const s=S.session,id=cur.id;cur.phase='done';
-  S.box[id]=boxTarget(err);s.seen[id]=1;s.queue.shift();
-  if(err>.5)s.queue.push(id);else s.done++;
-  save();next_();
-}
+const freeNext=nextCard,boxNext=nextCard;
 function startExam(){
   // S.opt.examLen Aufgaben, möglichst gleichmässig über die Lernziele verteilt
   const pools=TOPICS.map(t=>shuffle(cardsOf(t.id))).filter(p=>p.length);const q=[];
@@ -1170,9 +1172,10 @@ function showGrades(sug,msg,why){
       $('actions').innerHTML=`<p class="result" role="status">${msg}</p>
       <div class="grades" style="grid-template-columns:1fr 1fr"><button class="btn" data-e="1">Nicht gewusst<small>${fach(1)}</small></button><button class="btn primary" data-e="0">Gewusst<small>${fach(0)}</small></button></div>`;
     }else{
-      const e=cur.errors;
+      const e=cur.errors,b0=boxOf(cur.id);applyAnswer(e);const b1=boxOf(cur.id);
+      const moved=b1>b0?`Karte ist jetzt in Fach ${b1}.`:b1<b0?`Karte ist zurück in Fach ${b1}.`:`Karte bleibt in Fach ${b1}.`;
       $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}
-      <button class="btn primary" data-e="${e}">Weiter</button><p class="hint">${fr?(e>.5?'Die Karte kommt in dieser Runde nochmals.':''):`Karte ${fach(e)}.${e>.5?' Sie kommt in dieser Runde nochmals.':''}`}</p>`;
+      <button class="btn primary" data-e="${e}">Weiter</button><p class="hint">${fr?(e>.5?'Die Karte kommt in dieser Runde nochmals.':''):`${moved}${e>.5?' Sie kommt in dieser Runde nochmals.':''}`}</p>`;
     }
     app.querySelectorAll('#actions [data-e]').forEach(b=>b.onclick=()=>nextFn(+b.dataset.e));
     app.querySelector('#actions .primary').focus();return;
