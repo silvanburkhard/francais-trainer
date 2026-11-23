@@ -212,6 +212,7 @@ input.bad{background:var(--bad-bg);border-color:var(--bad)}
 .opt.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
 .opt.sel{background:var(--text);color:var(--bg)}
 .prow{margin-top:16px}
+.why .grp{display:inline-block;margin-top:6px;font-size:.9375rem;color:var(--muted)}
 .prow .opts{margin-top:6px}
 #prepRows .opts{grid-template-columns:repeat(3,1fr)}
 .opt:disabled{cursor:default}
@@ -756,11 +757,12 @@ VOCAB_RAW.split('\n').forEach(l=>{
   const acc=[];alts.forEach(a=>{const c=clean(a);acc.push(c);if(c.includes('/'))acc.push(c.split('/')[0])});
   CARDS['w:'+disp]={type:'vocab',topic:'vocab',fr:disp,de,acc};
 });
-PAIR_RAW.split('\n').forEach(l=>{const[g,fr,de]=l.split('|');CARDS['p:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr]}});
+PAIR_RAW.split('\n').forEach(l=>{const[g,fr,de]=l.split('|');CARDS['p:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr]};
+  CARDS['q:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr],prep:true}}); // q: = nur Präposition, eigener Lernstand
 Object.entries(ITEMS).forEach(([t,list])=>list.forEach((it,i)=>CARDS[`i:${t}:${i}`]={type:'item',topic:t,...it,a:[].concat(it.a)}));
 // Verknüpfung Vokabel <-> Verb-Ergänzung (gleiche Form)
 const LINK={};
-Object.entries(CARDS).forEach(([id,c])=>{if(c.type==='vocab'){const k=norm(clean(c.fr));Object.entries(CARDS).forEach(([id2,c2])=>{if(c2.type==='pair'&&norm(clean(c2.fr))===k){LINK[id]=id2;LINK[id2]=id}})}});
+Object.entries(CARDS).forEach(([id,c])=>{if(c.type==='vocab'){const k=norm(clean(c.fr));Object.entries(CARDS).forEach(([id2,c2])=>{if(c2.type==='pair'&&!c2.prep&&norm(clean(c2.fr))===k){LINK[id]=id2;LINK[id2]=id}})}});
 
 // ===================== ZUSTAND =====================
 const KEY='verbes-v1';
@@ -806,7 +808,8 @@ const TOP=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
 function cardsOf(tid){
   if(!tid)return TOPICS.flatMap(t=>cardsOf(t.id));
   if(tid==='verbs')return S.sel.filter(f=>BY[f]).map(f=>'v:'+f);
-  return Object.keys(CARDS).filter(id=>CARDS[id].topic===tid);
+  const prep=S.opt.compMode==='prep'; // Compléments: je nach Abfrage die ganzen Ausdrücke oder die Präpositions-Karten
+  return Object.keys(CARDS).filter(id=>CARDS[id].topic===tid&&!(CARDS[id].type==='pair'&&!!CARDS[id].prep!==prep));
 }
 
 // ===================== SPACED REPETITION (vereinfachtes SM-2) =====================
@@ -920,7 +923,7 @@ function topicPage(tid){
   let extra='';
   if(tid==='comp')extra=`<p>Im Französischen braucht ein Verb oft eine andere Ergänzung als im Deutschen. Die Listen aus dem Cahier:</p>`
     +PAIR_GROUPS.map(([g,title,note])=>{const rows=PAIR_RAW.split('\n').filter(l=>l.split('|')[0]===g);
-      return`<details><summary>${g.replace(/[ab]/,'')}. ${title}${prog(rows.map(l=>'p:'+l.split('|')[1]))}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${rows.map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`}).join('')
+      return`<details><summary>${g.replace(/[ab]/,'')}. ${title}${prog(rows.map(l=>(S.opt.compMode==='prep'?'q:':'p:')+l.split('|')[1]))}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${rows.map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`}).join('')
     +`<div class="note" style="margin-top:12px">Zusammenziehungen: à + le = <b>au</b> · à + les = <b>aux</b> · de + le = <b>du</b> · de + les = <b>des</b> · vor Vokal: <b>d'</b></div>`;
   const verbSel=tid!=='verbs'?'':`<section class="section"><div class="row-head" style="margin-top:0"><h2>Verben auswählen</h2><span><button class="link" id="selAll">Alle</button><button class="link" id="selNone">Keine</button></span></div>
     <div class="card"><div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:LEARNW(),sure:SURE()}[st];
@@ -943,7 +946,7 @@ function topicPage(tid){
   <section class="section"><span id="treset"><button class="link danger" id="tresetBtn">Fortschritt dieses Themas zurücksetzen</button></span></section>`;
   $('learn').onclick=()=>start('due',tid);$('all').onclick=()=>start('all',tid);wireBoxes();wireQuick(()=>topicPage(tid));
   confirmReset('treset',`${t.title} zurücksetzen?`,()=>{
-    const del=tid==='verbs'?VERBS.map(v=>'v:'+v.fr):ids;del.forEach(id=>{delete S.cards[id];delete S.box[id];delete S.free[id]});
+    const del=tid==='verbs'?VERBS.map(v=>'v:'+v.fr):Object.keys(CARDS).filter(id=>CARDS[id].topic===tid);del.forEach(id=>{delete S.cards[id];delete S.box[id];delete S.free[id]});
     if(S.session&&S.session.queue.some(id=>del.includes(id)))S.session=null},()=>topicPage(tid));
   if(tid==='verbs'){
     $('selAll').onclick=()=>{S.sel=VERBS.map(v=>v.fr);save();topicPage(tid)};
@@ -1065,7 +1068,7 @@ const ACC=()=>!S.opt.accBar?'':`<div class="acc" aria-label="Akzente">${'é è �
 const INPUT=(id,label,hint)=>`<input type="text" id="${id}" lang="fr" aria-label="${label}" placeholder="${label}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="${hint||'done'}">`;
 
 function render(){
-  if(cur.c.type==='pair'&&S.opt.compMode==='prep'&&!S.session.exam)return renderPrep();
+  if(cur.c.prep&&!S.session.exam)return renderPrep();
   if(S.opt.answer==='flip'&&!S.session.exam)return renderFlip();
   if(S.opt.answer==='choice'&&!S.session.exam&&cur.c.type!=='verb')return renderChoice();
   const {c,dir}=cur,t=TOP[c.topic].title;
@@ -1143,11 +1146,19 @@ function leaveTo(t){
   ok?topicPage(t):home();scrollTo(0,0);
 }
 // ----- Compléments: nur die Präposition abfragen -----
-// Lücken dort, wo à / de / d' steht; ohne Präposition eine Lücke vor qn/qc/faire mit Antwort «—»
+// Vor jeder Ergänzung (qn, qc, qn/qc, faire) eine Lücke: Antwort ist à, de oder «—» (direkt).
+// So muss man entscheiden, welche Ergänzung direkt ist und welche eine Präposition braucht.
+// Was nach «faire» steht, gehört zum Infinitiv und bekommt keine Lücke.
 function prepSlots(fr){
-  const t=fr.split(' '),ans=[],parts=t.map(w=>/^(à|de|d')$/.test(w)?(ans.push(w),null):w);
-  if(!ans.length){const i=t.findIndex(w=>/^(qn|qc|qn\/qc|faire)$/.test(w));ans.push('—');parts.splice(i<0?t.length:i,0,null)}
-  return{parts,ans};
+  const t=fr.split(' '),parts=[],ans=[],objs=[],OBJ=/^(qn|qc|qn\/qc|faire)$/;
+  for(let i=0;i<t.length;i++){
+    let w=t[i],pre='—';
+    if(/^(à|de|d')$/.test(w)&&OBJ.test(t[i+1]||'')){pre=w;w=t[++i]}
+    else if(!(i>0&&OBJ.test(w))){parts.push(w);continue}
+    ans.push(pre);objs.push(w);parts.push(null,w);
+    if(w==='faire'){parts.push(...t.slice(i+1));break}
+  }
+  return{parts,ans,objs};
 }
 function prepHtml(p,fill){let k=0;return p.parts.map(w=>w===null?(fill?fill(k++):(k++,'<span class="gap">&nbsp;</span>')):esc(w)).join(' ')}
 const NONE=['','-','—','–','x','0','/','ø','keine','kein','keins','nichts'];
@@ -1164,8 +1175,8 @@ function renderPrep(){
     $('flip').onclick=flipCard;$('turn').onclick=flipCard;$('flip').focus();return;
   }
   const body=mode==='choice'
-    ?`<div id="prepRows">${p.ans.map((_,k)=>`<div class="prow">${n>1?`<span class="qlbl">${k+1}. Lücke</span>`:''}<div class="opts" data-k="${k}">${['—','à','de'].map(o=>`<button class="opt" data-o="${o}" lang="fr">${o==='—'?'— keine':o}</button>`).join('')}</div></div>`).join('')}</div>`
-    :`<div class="answer card">${p.ans.map((_,k)=>`<div class="line"><label class="pr" for="pg${k}">${n>1?`${k+1}. Lücke`:'Präposition'}</label>${INPUT('pg'+k,'à, de oder leer',k<n-1?'next':'done')}</div>`).join('')}<p class="hint">Leer lassen oder «–» schreiben, wenn keine Präposition hingehört.</p></div>`;
+    ?`<div id="prepRows">${p.ans.map((_,k)=>`<div class="prow">${n>1?`<span class="qlbl">Vor «${esc(p.objs[k])}»</span>`:''}<div class="opts" data-k="${k}">${['—','à','de'].map(o=>`<button class="opt" data-o="${o}" lang="fr">${o==='—'?'— keine':o}</button>`).join('')}</div></div>`).join('')}</div>`
+    :`<div class="answer card">${p.ans.map((_,k)=>`<div class="line"><label class="pr" for="pg${k}">vor ${esc(p.objs[k])}</label>${INPUT('pg'+k,'à, de oder leer',k<n-1?'next':'done')}</div>`).join('')}<p class="hint">Leer lassen oder «–» schreiben, wenn keine Präposition hingehört.</p></div>`;
   app.innerHTML=frame(`${t} · Nur Präposition`,prompt,body)+(mode==='choice'?'':ACC());
   wire();
   if(mode==='choice'){
@@ -1192,7 +1203,8 @@ function checkPrep(vals){
   if(S.opt.answer==='choice')app.querySelectorAll('#prepRows .opts').forEach(g=>{const k=+g.dataset.k;g.querySelectorAll('.opt').forEach(b=>{b.disabled=true;b.classList.remove('sel');if(b.dataset.o===p.ans[k])b.classList.add('ok');else if(b.dataset.o===cur.picks[k])b.classList.add('bad')})});
   else p.ans.forEach((_,k)=>{const i=$('pg'+k);i.readOnly=true;i.className=cls(res[k])});
   const msg=err===0?'✓ Richtig':err<1?'~ Fast: Akzent beachten':'✗ Falsch';
-  showGrades(err<1?2:0,`<span class="res ${cls(err)}">${msg}</span>`,`<b lang="fr">${esc(c.fr)}</b> – ${esc(c.de)}`);
+  const grp=PAIR_GROUPS.find(x=>x[0]===c.g);
+  showGrades(err<1?2:0,`<span class="res ${cls(err)}">${msg}</span>`,`<b lang="fr">${esc(c.fr)}</b> – ${esc(c.de)}${grp?`<br><span class="grp">${grp[1]}${grp[2]?`. ${grp[2]}`:''}</span>`:''}`);
 }
 // ----- Auswählen statt Eintippen -----
 const REL_OPTS=['qui','que','où','dont','ce qui','ce que','lequel','laquelle','lesquels','lesquelles','auquel','auxquels','auxquelles','duquel'];
