@@ -760,22 +760,26 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type'},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type',algo:true},S.opt);
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
+S.free=S.free||{}; // Ohne Algorithmus: 1 = zuletzt gewusst, 0 = zuletzt nicht gewusst
 function applyTheme(){const r=document.documentElement;S.opt.theme==='auto'?r.removeAttribute('data-theme'):r.dataset.theme=S.opt.theme}
 S.opt.theme='auto';applyTheme(); // Hell/Dunkel folgt immer dem System
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const DAY=864e5;
 const card=id=>S.cards[id]||(S.cards[id]={ease:2.5,ivl:0,due:0,reps:0,lapses:0,err:[0,0,0,0,0,0]});
-const BOX=()=>S.opt.method==='box';
+const FREE=()=>!S.opt.algo; // frei üben, ohne Lernalgorithmus
+const BOX=()=>!FREE()&&S.opt.method==='box';
 const boxOf=id=>S.box[id]||0;
-const status=id=>{if(BOX()){const b=boxOf(id);return b===0?'new':b>=5?'sure':'learn'}
+const status=id=>{if(FREE())return S.free[id]===undefined?'new':S.free[id]?'sure':'learn';
+  if(BOX()){const b=boxOf(id);return b===0?'new':b>=5?'sure':'learn'}
   const c=S.cards[id];if(!c||(!c.reps&&!c.lapses))return'new';return c.ivl>=7?'sure':'learn'};
-const isDue=id=>BOX()?boxOf(id)<5:(!S.cards[id]||S.cards[id].due<=Date.now());
-const SURE=()=>BOX()?'gelernt':'sicher';
-const DUEW=()=>BOX()?'offen':'fällig';
+const isDue=id=>FREE()?S.free[id]!==1:BOX()?boxOf(id)<5:(!S.cards[id]||S.cards[id].due<=Date.now());
+const SURE=()=>FREE()?'gewusst':BOX()?'gelernt':'sicher';
+const LEARNW=()=>FREE()?'nicht gewusst':'am Lernen';
+const DUEW=()=>BOX()||FREE()?'offen':'fällig';
 const ROUND=20; // Karten pro Lernkartei-Runde
 
 const TOPICS=[
@@ -823,11 +827,11 @@ function counts(ids){let due=0,neu=0,sure=0;ids.forEach(id=>{if(isDue(id))due++;
 // Fortschrittsbalken: sicher | am Lernen | neu
 function prog(ids,big){
   const c=counts(ids),t=c.total||1,pct=Math.round(c.sure/t*100);
-  return`<span class="prog${big?' big':''}"><span class="pbar" role="img" aria-label="${pct} Prozent ${SURE()}: ${c.sure} ${SURE()}, ${c.learn} am Lernen, ${c.neu} neu"><i class="s" style="width:${c.sure/t*100}%"></i><i class="l" style="width:${c.learn/t*100}%"></i></span>
-  <span class="plab" aria-hidden="true"><span><b>${pct} %</b> ${SURE()}</span><span>${c.sure} ${SURE()} · ${c.learn} am Lernen · ${c.neu} neu</span></span></span>`;
+  return`<span class="prog${big?' big':''}"><span class="pbar" role="img" aria-label="${pct} Prozent ${SURE()}: ${c.sure} ${SURE()}, ${c.learn} ${LEARNW()}, ${c.neu} neu"><i class="s" style="width:${c.sure/t*100}%"></i><i class="l" style="width:${c.learn/t*100}%"></i></span>
+  <span class="plab" aria-hidden="true"><span><b>${pct} %</b> ${SURE()}</span><span>${c.sure} ${SURE()} · ${c.learn} ${LEARNW()} · ${c.neu} neu</span></span></span>`;
 }
-const LEGEND=()=>`<p class="legend"><span class="dot s"></span>${BOX()?'gelernt (Fach 5)':'sicher (Abstand ab 7 Tagen)'}<span class="dot l"></span>am Lernen<span class="dot n"></span>neu</p>`;
-function nextDue(ids){if(BOX())return ids.length?'<p class="duehint">Alle Karten sind in Fach 5. Gelernt!</p>':'';const d=ids.map(id=>S.cards[id]&&S.cards[id].due).filter(Boolean);if(d.length<ids.length||!d.length)return'';
+const LEGEND=()=>`<p class="legend"><span class="dot s"></span>${FREE()?'zuletzt gewusst':BOX()?'gelernt (Fach 5)':'sicher (Abstand ab 7 Tagen)'}<span class="dot l"></span>${FREE()?'zuletzt nicht gewusst':'am Lernen'}<span class="dot n"></span>neu</p>`;
+function nextDue(ids){if(FREE())return ids.length?'<p class="duehint">Du hast alle Karten zuletzt gewusst.</p>':'';if(BOX())return ids.length?'<p class="duehint">Alle Karten sind in Fach 5. Gelernt!</p>':'';const d=ids.map(id=>S.cards[id]&&S.cards[id].due).filter(Boolean);if(d.length<ids.length||!d.length)return'';
   return`<p class="duehint">Nichts fällig. Nächste Wiederholung: ${new Date(Math.min(...d)).toLocaleString('de-CH',{weekday:'long',hour:'2-digit',minute:'2-digit'})}.</p>`}
 const seg=(name,opts,val,label)=>`<div class="seg" role="radiogroup" aria-label="${label}">${opts.map(([v,t])=>`<label><input type="radio" name="${name}" value="${v}" ${String(val)===String(v)?'checked':''}>${t}</label>`).join('')}</div>`;
 const on=(id,f)=>{const e=$(id);e&&(e.onclick=f)};
@@ -874,20 +878,26 @@ function home(){
   app.innerHTML=`
   ${topbar('')}
   <h1>Dossier 5</h1><p class="sub">Vokabeln, Verben und Grammatik für die Prüfung.</p>
-  <section class="section"><h2>${BOX()?'Lernkartei':'Heute'}</h2>
-    ${BOX()?boxStrip(all):`<div class="stats">
+  <section class="section"><h2>${FREE()?'Üben':BOX()?'Lernkartei':'Heute'}</h2>
+    ${BOX()?boxStrip(all):FREE()?`<div class="stats">
+      <div class="stat"><b>${k.neu}</b><span>neu</span></div>
+      <div class="stat"><b>${k.learn}</b><span>nicht gewusst</span></div>
+      <div class="stat"><b>${k.sure}</b><span>gewusst</span></div>
+    </div>`:`<div class="stats">
       <div class="stat"><b>${k.due}</b><span>fällig</span></div>
       <div class="stat"><b>${k.neu}</b><span>neu</span></div>
       <div class="stat"><b>${k.sure}</b><span>sicher</span></div>
     </div>`}
     ${quickOpts()}
     ${s?`<button class="btn primary" id="resume">${s.exam?'Prüfung':'Runde'} fortsetzen (${s.done} / ${s.total})</button>`:''}
-    <button class="btn ${s?'':'primary'}" id="due" ${k.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,k.due)} Karten)`:`Alles Fällige lernen (${k.due})`}</button>
+    ${FREE()?`<button class="btn ${s?'':'primary'}" id="freeAll">Alle ${k.total} Karten üben</button>
+    <button class="btn" id="due" ${k.learn?'':'disabled'}>Nicht gewusste üben (${k.learn})</button>`
+    :`<button class="btn ${s?'':'primary'}" id="due" ${k.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,k.due)} Karten)`:`Alles Fällige lernen (${k.due})`}</button>`}
     <button class="btn" id="exam">Prüfung starten (${S.opt.examLen} Fragen)</button>
   </section>
   ${BOX()?'':`<section class="section"><h2>Gesamtfortschritt</h2><div class="card">${prog(all,true)}</div>${LEGEND()}</section>`}
   ${groups.map(g=>`<section class="section"><h2>${g}</h2>${TOPICS.filter(t=>t.group===g).map(topicRow).join('')}</section>`).join('')}`;
-  on('resume',next_);on('due',()=>start('due',null));on('exam',startExam);
+  on('resume',next_);on('due',()=>start('due',null));on('freeAll',()=>start('all',null));on('exam',startExam);
   app.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>start('due',b.dataset.learn));
   wireBoxes();wireQuick(home);
 }
@@ -902,25 +912,27 @@ function topicPage(tid){
       return`<details><summary>${g.replace(/[ab]/,'')}. ${title}${prog(rows.map(l=>'p:'+l.split('|')[1]))}</summary>${note?`<p class="hint">${note}</p>`:''}<table>${rows.map(l=>{const[,fr,de]=l.split('|');return`<tr><td><b>${fr}</b></td><td>${de}</td></tr>`}).join('')}</table></details>`}).join('')
     +`<div class="note" style="margin-top:12px">Zusammenziehungen: à + le = <b>au</b> · à + les = <b>aux</b> · de + le = <b>du</b> · de + les = <b>des</b> · vor Vokal: <b>d'</b></div>`;
   const verbSel=tid!=='verbs'?'':`<section class="section"><div class="row-head" style="margin-top:0"><h2>Verben auswählen</h2><span><button class="link" id="selAll">Alle</button><button class="link" id="selNone">Keine</button></span></div>
-    <div class="card"><div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:'am Lernen',sure:SURE()}[st];
+    <div class="card"><div class="chips">${VERBS.map(v=>{const st=status('v:'+v.fr),sym={new:'○',learn:'◐',sure:'●'}[st],lab={new:'neu',learn:LEARNW(),sure:SURE()}[st];
       return`<button class="chip" data-fr="${v.fr}" aria-pressed="${S.sel.includes(v.fr)}" aria-label="${v.fr}, ${lab}"><span class="st" aria-hidden="true">${sym}</span>${v.fr}</button>`}).join('')}</div></div>
-    <p class="legend">○ neu · ◐ am Lernen · ● ${SURE()} · Nur ausgewählte Verben werden abgefragt.</p></section>`;
+    <p class="legend">○ neu · ◐ ${LEARNW()} · ● ${SURE()} · Nur ausgewählte Verben werden abgefragt.</p></section>`;
   app.innerHTML=`${topbar(t.title)}
   <h1>${t.title}</h1><p class="sub">${t.sub}</p>
   <section class="section"><h2>Fortschritt</h2><div class="card">${prog(ids,true)}${c.due?`<p class="duehint">${c.due} von ${c.total} ${DUEW()}.</p>`:nextDue(ids)}</div>${LEGEND()}</section>
-  <section class="section"><h2>${BOX()?'Lernkartei':'Lernen'}</h2>
+  <section class="section"><h2>${BOX()?'Lernkartei':FREE()?'Üben':'Lernen'}</h2>
     ${BOX()?boxStrip(ids,tid).replace('<p class="hint">','<p class="hint" style="margin:0 0 16px">'):''}
     ${quickOpts()}
-    <button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,c.due)} Karten)`:`Fällige lernen (${c.due})`}</button>
-    <button class="btn" id="all" ${c.total?'':'disabled'}>Alle ${c.total} durchgehen</button>
-    <p class="hint">${BOX()?'«Alle durchgehen» nimmt jede Karte einmal dran, auch die aus Fach 5.':'«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.'}</p>
+    ${FREE()?`<button class="btn primary" id="all" ${c.total?'':'disabled'}>Alle ${c.total} Karten üben</button>
+    <button class="btn" id="learn" ${c.learn?'':'disabled'}>Nicht gewusste üben (${c.learn})</button>`
+    :`<button class="btn primary" id="learn" ${c.due?'':'disabled'}>${BOX()?`Lernkartei üben (${Math.min(ROUND,c.due)} Karten)`:`Fällige lernen (${c.due})`}</button>
+    <button class="btn" id="all" ${c.total?'':'disabled'}>Alle ${c.total} durchgehen</button>`}
+    <p class="hint">${FREE()?'Die Karten kommen in zufälliger Reihenfolge. Was du nicht weisst, kommt in derselben Runde nochmals.':BOX()?'«Alle durchgehen» nimmt jede Karte einmal dran, auch die aus Fach 5.':'«Alle durchgehen» ist zum Pauken: Fehler fliessen in die Wiederholung ein, richtige Antworten verschieben nichts.'}</p>
   </section>
   ${verbSel}
   <section class="section"><h2>Erklärung</h2><div class="card ex">${EXPLAIN[tid]||''}${extra}</div></section>
   <section class="section"><span id="treset"><button class="link danger" id="tresetBtn">Fortschritt dieses Themas zurücksetzen</button></span></section>`;
   $('learn').onclick=()=>start('due',tid);$('all').onclick=()=>start('all',tid);wireBoxes();wireQuick(()=>topicPage(tid));
   confirmReset('treset',`${t.title} zurücksetzen?`,()=>{
-    const del=tid==='verbs'?VERBS.map(v=>'v:'+v.fr):ids;del.forEach(id=>{delete S.cards[id];delete S.box[id]});
+    const del=tid==='verbs'?VERBS.map(v=>'v:'+v.fr):ids;del.forEach(id=>{delete S.cards[id];delete S.box[id];delete S.free[id]});
     if(S.session&&S.session.queue.some(id=>del.includes(id)))S.session=null},()=>topicPage(tid));
   if(tid==='verbs'){
     $('selAll').onclick=()=>{S.sel=VERBS.map(v=>v.fr);save();topicPage(tid)};
@@ -936,7 +948,8 @@ function settings(){
   const methodHint=o.method==='box'?'Wie eine Karteibox mit 5 Fächern: Richtig → die Karte rückt ein Fach weiter, falsch → zurück in Fach 1. In Fach 5 gilt sie als gelernt.':'Die Seite plant für jede Aufgabe, wann du sie wiederholst. Nach jeder Antwort sagst du, wie schwer sie war.';
   app.innerHTML=`${topbar('Einstellungen')}<h1>Einstellungen</h1>
   <section class="section"><h2>Lernmethode</h2><div class="group">
-    <div class="setrow col"><div class="lbl"><b>So lernst du</b><span>${methodHint}</span></div>${seg('method',[['box','Lernkartei'],['plan','Wiederholungsplan']],o.method,'Lernmethode')}</div>
+    <div class="setrow"><label class="lbl" for="algo"><b>Lernalgorithmus verwenden</b><span>${o.algo?'Die Seite entscheidet, welche Karten du wann wiederholst.':'Du übst die Karten in zufälliger Reihenfolge. Die Seite merkt sich nur, ob du eine Karte zuletzt gewusst hast.'}</span></label><input type="checkbox" class="toggle" id="algo" ${o.algo?'checked':''}></div>
+    ${o.algo?`<div class="setrow col"><div class="lbl"><b>Algorithmus</b><span>${methodHint}</span></div>${seg('method',[['box','Lernkartei'],['plan','Wiederholungsplan']],o.method,'Algorithmus')}</div>`:''}
   </div></section>
   <section class="section"><h2>Abfrage</h2><div class="group">
     <div class="setrow"><label class="lbl" for="strict"><b>Akzente streng bewerten</b><span>Ein fehlender oder falscher Akzent zählt als Fehler statt als «fast richtig».</span></label><input type="checkbox" class="toggle" id="strict" ${o.strict?'checked':''}></div>
@@ -953,11 +966,13 @@ function settings(){
   const set=(k,v)=>{if(k==='dir')S.dir=v;else o[k]=v;save();applyTheme();const f=document.activeElement&&document.activeElement.name;settings();if(f){const n=app.querySelector(`input[name=${f}]:checked`);n&&n.focus()}};
   app.querySelectorAll('.seg input').forEach(r=>r.onchange=()=>set(r.name,r.name==='examLen'?+r.value:r.value));
   ['strict','accBar'].forEach(k=>$(k).onchange=e=>{o[k]=e.target.checked;save()});
-  confirmReset('reset','Alles löschen?',()=>{S.cards={};S.box={};S.session=null},settings);
+  $('algo').onchange=e=>{o.algo=e.target.checked;save();settings();$('algo').focus()};
+  confirmReset('reset','Alles löschen?',()=>{S.cards={};S.box={};S.free={};S.session=null},settings);
 }
 
 // ===================== SITZUNG =====================
 function start(mode,tid,fach){
+  if(FREE())return freeStart(mode,tid);
   if(BOX())return boxStart(mode,tid,fach);
   let ids=shuffle(cardsOf(tid).filter(id=>mode==='all'||isDue(id)));
   if(mode==='due')ids.sort((a,b)=>(S.cards[a]?S.cards[a].due:Infinity)-(S.cards[b]?S.cards[b].due:Infinity)); // Wiederholungen zuerst
@@ -984,6 +999,22 @@ function boxTarget(err){
   const b=Math.max(1,boxOf(cur.id));
   if(S.session.seen[cur.id])return b;
   return err===0?Math.min(5,b+1):err<=.5?b:1;
+}
+// Ohne Algorithmus: zufällige Reihenfolge, «due» = nur die zuletzt nicht gewussten
+function freeStart(mode,tid){
+  let ids=cardsOf(tid);
+  if(mode==='due')ids=ids.filter(id=>S.free[id]===0);
+  ids=shuffle(ids);if(!ids.length)return;
+  S.session={mode:'free',topic:tid,queue:ids,total:ids.length,done:0,seen:{}};save();
+  if(location.hash){history.replaceState(null,'',location.pathname+location.search)}
+  next_();
+}
+function freeNext(err){
+  if(cur.phase!=='checked')return;
+  const s=S.session,id=cur.id;cur.phase='done';
+  if(!s.seen[id])S.free[id]=err<=.5?1:0;s.seen[id]=1;s.queue.shift();
+  if(err>.5)s.queue.push(id);else s.done++;
+  save();next_();
 }
 function boxNext(err){
   if(cur.phase!=='checked')return;
@@ -1112,18 +1143,19 @@ function showGrades(sug,msg,why){
     $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}<button class="btn primary" id="go">Weiter</button>`;
     $('go').onclick=()=>examNext();$('go').focus();return;
   }
-  if(s.mode==='box'){
+  if(s.mode==='box'||s.mode==='free'){
     cur.phase='checked';
-    const fach=e=>{const t=boxTarget(e),b=boxOf(cur.id);return t>b?`→ Fach ${t}`:t<b?`zurück in Fach ${t}`:`bleibt in Fach ${t}`};
+    const fr=s.mode==='free',nextFn=fr?freeNext:boxNext;
+    const fach=e=>fr?(e>.5?'kommt nochmals':'weiter'):(()=>{const t=boxTarget(e),b=boxOf(cur.id);return t>b?`→ Fach ${t}`:t<b?`zurück in Fach ${t}`:`bleibt in Fach ${t}`})();
     if(sug===null){ // Vokabel Französisch → Deutsch: selbst bewerten
       $('actions').innerHTML=`<p class="result" role="status">${msg}</p>
       <div class="grades" style="grid-template-columns:1fr 1fr"><button class="btn" data-e="1">Nicht gewusst<small>${fach(1)}</small></button><button class="btn primary" data-e="0">Gewusst<small>${fach(0)}</small></button></div>`;
     }else{
       const e=cur.errors;
       $('actions').innerHTML=`<p class="result" role="status">${msg}</p>${why?`<div class="why">${why}</div>`:''}
-      <button class="btn primary" data-e="${e}">Weiter</button><p class="hint">Karte ${fach(e)}.${e>.5?' Sie kommt in dieser Runde nochmals.':''}</p>`;
+      <button class="btn primary" data-e="${e}">Weiter</button><p class="hint">${fr?(e>.5?'Die Karte kommt in dieser Runde nochmals.':''):`Karte ${fach(e)}.${e>.5?' Sie kommt in dieser Runde nochmals.':''}`}</p>`;
     }
-    app.querySelectorAll('#actions [data-e]').forEach(b=>b.onclick=()=>boxNext(+b.dataset.e));
+    app.querySelectorAll('#actions [data-e]').forEach(b=>b.onclick=()=>nextFn(+b.dataset.e));
     app.querySelector('#actions .primary').focus();return;
   }
   if(sug===null)sug=2;
@@ -1142,7 +1174,7 @@ function examNext(){
   const max=c.type==='verb'?c.v.forms.length+(cur.dir==='de'?1:0):1;
   const lost=Math.min(max,cur.errors);
   s.max+=max;s.pts+=max-lost;
-  if(lost>0){s.weak[c.topic]=(s.weak[c.topic]||0)+1;if(BOX())S.box[cur.id]=1;const k=card(cur.id);k.due=Math.min(k.due||0,Date.now())}
+  if(lost>0){s.weak[c.topic]=(s.weak[c.topic]||0)+1;if(BOX())S.box[cur.id]=1;if(FREE())S.free[cur.id]=0;const k=card(cur.id);k.due=Math.min(k.due||0,Date.now())}
   s.queue.shift();s.done++;cur.phase='done';save();next_();
 }
 
@@ -1189,7 +1221,7 @@ document.addEventListener('keydown',e=>{
   if(cur.flip&&cur.phase==='ask'&&(e.key===' '||e.key==='Enter')){e.preventDefault();flipCard();return}
   if(cur.phase==='ask'&&cur.c.o&&/^[1-9]$/.test(e.key)){const b=app.querySelectorAll('.opt')[+e.key-1];if(b){e.preventDefault();b.click()}return}
   if(cur.phase!=='checked'||S.session.exam)return;
-  if(S.session.mode==='box'){if(e.key==='Enter'){e.preventDefault();const b=app.querySelector('#actions .btn.primary');b&&b.click()}return}
+  if(S.session.mode==='box'||S.session.mode==='free'){if(e.key==='Enter'){e.preventDefault();const b=app.querySelector('#actions .btn.primary');b&&b.click()}return}
   if(e.key==='Enter'){e.preventDefault();grade(cur.sug)}
   else if('1234'.includes(e.key)&&e.key.length===1){grade(+e.key-1)}
 });
