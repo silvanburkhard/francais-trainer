@@ -249,10 +249,11 @@ footer p{margin:0;display:flex;align-items:center;gap:8px;min-height:44px}
 #cat{position:absolute;left:0;top:0;width:48px;height:32px;z-index:5;pointer-events:none;will-change:transform}
 #cat svg{display:block;width:48px;height:32px;overflow:visible;pointer-events:auto;cursor:pointer;stroke:var(--text);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 #cat .f{fill:var(--bg)}#cat .n{fill:none}#cat .e{fill:var(--text);stroke:none}
-#cat.left svg{transform:scaleX(-1)}
+#cat{transition:opacity .3s ease}#cat svg{transition:transform .22s ease}#cat.left svg{transform:scaleX(-1)}
+#cat .pose{transition:opacity .18s ease}#cat .cl{opacity:0}
 #cat .fx{position:absolute;left:18px;top:-14px;font-size:0.875rem;font-weight:700;color:var(--text);pointer-events:none;animation:catfx 1.6s ease-out forwards}
 @keyframes catfx{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22px)}}
-@media (prefers-reduced-motion:reduce){#cat .fx{animation:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#cat .fx{animation:none;opacity:1}#cat,#cat svg,#cat .pose{transition:none}}
 </style>
 </head>
 <body>
@@ -1525,87 +1526,142 @@ datenschutz:`<h1>Datenschutz</h1>
 <p>Die Vokabeln, Konjugationen, Übungen und Erklärungen habe ich mit Sorgfalt zusammengestellt. Trotzdem können Fehler darin sein, und ich übernehme keine Gewähr für Richtigkeit und Vollständigkeit. Verlass dich im Zweifel auf dein Lehrmittel oder frag deine Lehrperson. Wenn du einen Fehler findest, schreib mir gerne eine E-Mail.</p>`};
 function legal(k){cur=null;app.innerHTML=`${topbar('Datenschutz')}<article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
 // ===================== KATZE =====================
-// Strichzeichnung im Stil der Seite: 1.5px Linie, gefüllt mit Hintergrundfarbe, damit sie «auf» den Linien sitzt.
+// Strichzeichnung im Stil der Seite. Beine, Schwanz und Atmung werden pro Bild berechnet,
+// damit alles fliessend wirkt. Sie läuft mit Anlauf und Abbremsen, duckt sich vor dem Sprung,
+// sitzt lange, schläft irgendwann ein und kommt nach einem Seitenwechsel von links hereinspaziert.
 const Cat=(()=>{
-  const TAIL={down:'M12 17C6 16 4 11 6 6',up:'M12 16C8 12 9 6 7 2'};
-  const STAND=(legs,tail)=>`<path class="n" d="${tail}"/><path class="n" d="${legs}"/>
-    <path class="f" d="M12 19C11.5 14.5 15 12.6 20 13.2C25 13.8 30 12.6 33.5 15C35.5 17 35 21.5 32 23.5C29 25 18 25 15.5 24C13 23 12.2 21 12 19Z"/>
-    <path class="f" d="M32.6 8.6L33 2.6L36.4 6.4L39.6 6.4L42 2.6L42.4 8.6A6 6 0 1 1 32.6 8.6Z"/><circle class="e" cx="39.6" cy="11.4" r=".9"/>`;
-  const LEGS=['M15 24L14 31M19 24L20 31M28 24L27 31M32 24L33 31','M15 24L16.5 31M19 24L17.5 31M28 24L29.5 31M32 24L30.5 31'];
-  const POSE={
-    walk0:STAND(LEGS[0],TAIL.down),walk1:STAND(LEGS[1],TAIL.down),happy:STAND(LEGS[0],TAIL.up),
-    sit:`<path class="n" d="M15 30C9 31.5 4 30 5 25"/><path class="f" d="M14 31C12 24 14 15 22 14C27 14 29 19 30 24L30 31Z"/><path class="n" d="M26 21L26 31"/>
-      <path class="f" d="M22.6 6.6L23 0.6L26.4 4.4L29.6 4.4L32 0.6L32.4 6.6A6 6 0 1 1 22.6 6.6Z"/><circle class="e" cx="29.4" cy="9.4" r=".9"/>`,
-    blink:`<path class="n" d="M15 30C9 31.5 4 30 5 25"/><path class="f" d="M14 31C12 24 14 15 22 14C27 14 29 19 30 24L30 31Z"/><path class="n" d="M26 21L26 31"/>
-      <path class="f" d="M22.6 6.6L23 0.6L26.4 4.4L29.6 4.4L32 0.6L32.4 6.6A6 6 0 1 1 22.6 6.6Z"/><path class="n" d="M28.4 9.6Q29.4 10.4 30.4 9.6"/>`,
-    sleep:`<path class="n" d="M11 30.5C11 33 24 33 29 31"/><path class="f" d="M10 31C8 25 13 20 22 20C31 20 36 24 36 31Z"/>
-      <path class="f" d="M29 23.2L29.4 18.4L32.4 21.4L34.6 21.4L37.6 18.4L38 23.2A5.4 5.4 0 1 1 29 23.2Z"/><path class="n" d="M33 26.2Q34 27 35 26.2"/>`
-  };
-  let el,svg,st=null,raf=0,last=0,obs=false;
+  const BODY='M12 19C11.5 14.5 15 12.6 20 13.2C25 13.8 30 12.6 33.5 15C35.5 17 35 21.5 32 23.5C29 25 18 25 15.5 24C13 23 12.2 21 12 19Z';
+  const SVG=`<g class="pose" data-p="stand"><path class="n tl"/><path class="n lg"/><g class="bd"><path class="f" d="${BODY}"/><g class="hd"><path class="f" d="M32.6 8.6L33 2.6L36.4 6.4L39.6 6.4L42 2.6L42.4 8.6A6 6 0 1 1 32.6 8.6Z"/><circle class="e" cx="39.6" cy="11.4" r=".9"/></g></g></g>
+    <g class="pose" data-p="sit"><path class="n tl"/><path class="f" d="M14 31C12 24 14 15 22 14C27 14 29 19 30 24L30 31Z"/><path class="n" d="M26 21L26 31"/><g class="hd"><path class="f" d="M22.6 6.6L23 0.6L26.4 4.4L29.6 4.4L32 0.6L32.4 6.6A6 6 0 1 1 22.6 6.6Z"/><circle class="e ey" cx="29.4" cy="9.4" r=".9"/><path class="n cl" d="M28.4 9.6Q29.4 10.4 30.4 9.6"/></g></g>
+    <g class="pose" data-p="sleep"><path class="n" d="M11 30.5C11 33 24 33 29 31"/><g class="br"><path class="f" d="M10 31C8 25 13 20 22 20C31 20 36 24 36 31Z"/><path class="f" d="M29 23.2L29.4 18.4L32.4 21.4L34.6 21.4L37.6 18.4L38 23.2A5.4 5.4 0 1 1 29 23.2Z"/><path class="n" d="M33 26.2Q34 27 35 26.2"/></g></g>`;
+  const HIPS=[15,19,28,32],OFF=[0,Math.PI,Math.PI,0],TAU=Math.PI*2;
+  let el,svg,R={},st=null,raf=0,now=0,obs=false;
   const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rnd=(a,b)=>a+Math.random()*(b-a);
-  const lesson=()=>!!cur; // Lernrunde läuft
-  // Sitzplätze: Oberkanten von Linien, Karten und Überschriften
-  function perches(onlyVisible){
-    // nur Stellen mit freiem Raum darüber: Überschriften (Textbreite) und die Linie unter dem Countdown
-    const sel=lesson()?'#app section.card':'#app .cd,#app h1,#app section>h2';
-    const out=[],vh=innerHeight;
-    app.querySelectorAll(sel).forEach(e=>{const p=edge({e});if(!p||p.x2-p.x1<20)return;
-      const vy=p.y-scrollY;if(onlyVisible&&(vy<70||vy>vh-20))return;out.push({e,...p})});
-    return out;
-  }
-  function edge(p){ // Position neu messen (Layout kann sich ändern)
-    if(!p||!p.e.isConnected)return null;const e=p.e;let r=e.getBoundingClientRect(),y;
+  const lesson=()=>!!cur;
+  const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+
+  // ---- Sitzplätze: Überschriften (Textbreite), Linie unter dem Countdown, beim Lernen die Aufgabenkarte
+  function edge(e){
+    if(!e||!e.isConnected)return null;let r=e.getBoundingClientRect(),y;
     if(/^H[12]$/.test(e.tagName)){const g=document.createRange();g.selectNodeContents(e);r=g.getBoundingClientRect();y=r.top+(e.tagName==='H1'?8:4)}
     else y=e.classList.contains('cd')?r.bottom:r.top;
     if(!r.width)return null;
-    return{x1:r.left+scrollX,x2:Math.max(r.left+scrollX,r.right+scrollX-48),y:y+scrollY};
+    let x1=r.left+scrollX,x2=r.right+scrollX-48;
+    if(e.matches('section.card'))x1=Math.max(x1,x2-70); // beim Lernen nur rechts am Rand
+    return{x1,x2:Math.max(x1,x2),y:y+scrollY};
   }
-  function pose(n){if(st.pose===n)return;st.pose=n;svg.innerHTML=POSE[n]}
-  function place(x,y){el.style.transform=`translate(${Math.round(x)}px,${Math.round(y-31)}px)`}
-  function choose(){ // nächste Handlung
-    const P=perches(true);
-    if(lesson()){const p=P[0]||perches(false)[0];if(!p)return hide();
-      if(st.p&&st.p.e!==p.e)return jumpTo(p,p.x2-8);
-      st.p=p;st.x=p.x2-8;st.mode=Math.random()<.25?'sleep':'sit';st.until=last+rnd(6e3,14e3);return}
-    const r=Math.random(),e0=st.p&&edge(st.p),vy=e0&&e0.y-scrollY,away=!e0||vy<70||vy>innerHeight-20,narrow=e0&&e0.x2-e0.x1<90;
-    if(away||(P.length&&r<(narrow?.6:.3)&&!RM())){const p=P.length?P[Math.random()*P.length|0]:perches(false)[0];if(!p)return hide();
-      return RM()?(st.p=p,st.x=rnd(p.x1,p.x2),st.mode='sit',st.until=last+rnd(4e3,8e3)):jumpTo(p,rnd(p.x1,p.x2))}
-    if(r<.72&&!RM()){const e=edge(st.p);st.mode='walk';st.tx=rnd(e.x1,e.x2);return}
-    if(r<.86){st.mode='sleep';st.until=last+rnd(8e3,16e3);return}
-    st.mode='sit';st.until=last+rnd(2500,6000);
+  const inView=p=>{const v=p.y-scrollY;return v>70&&v<innerHeight-20};
+  function perches(){
+    const sel=lesson()?'#app section.card':'#app .cd,#app h1,#app section>h2';
+    return[...app.querySelectorAll(sel)].map(e=>({e,...edge(e)})).filter(p=>p.y!==undefined&&!isNaN(p.y));
   }
-  function jumpTo(p,x){const e=edge(st.p)||{y:st.y};st.mode='jump';st.j={x0:st.x,y0:st.y??e.y,p,x1:x,t0:last};st.dir=x<st.x?-1:1;el.classList.toggle('left',st.dir<0)}
-  function hide(){el.style.visibility='hidden';st.mode='wait';st.until=last+1500}
+  function nearestVisible(exclude){
+    const P=perches().filter(p=>inView(p)&&p.e!==exclude);
+    P.sort((a,b)=>Math.abs(a.y-st.y)-Math.abs(b.y-st.y));return P[0];
+  }
+
+  // ---- Zustände
+  function set(mode,dur){st.mode=mode;st.t0=now;st.until=now+(dur||0)}
+  function face(d){if(d&&d!==st.dir){st.dir=d;el.classList.toggle('left',d<0);return true}return false}
+  function sit(min,max){set('sit',rnd(min||3000,max||7000))}
+  function walkTo(tx){st.tx=tx;if(face(Math.sign(tx-st.x))&&!RM())set('turn',220);else set('walk')}
+  function jumpTo(e){const p=edge(e);if(!p)return sit();
+    face(Math.sign((p.x1+p.x2)/2-st.x)||st.dir);
+    st.j={e,x0:st.x,y0:st.y,x1:rnd(p.x1,p.x2),dur:Math.min(800,420+Math.hypot(p.y-st.y,(p.x1+p.x2)/2-st.x)*.6)};
+    set('crouch',240)}
+  function enter(e){ // von links hereinspazieren
+    const p=edge(e);if(!p)return;st.e=e;st.y=p.y;st.x=Math.min(-50,scrollX-50);el.style.opacity=1;face(1);st.v=20;st.tx=rnd(p.x1,p.x2);set('walk')}
+  function relocate(direct){
+    const target=nearestVisible()||perches()[0];
+    if(!target){el.style.opacity=0;set('wait',800);return}
+    if(RM()||direct){const p=edge(target.e);st.e=target.e;st.x=rnd(p.x1,p.x2);st.y=p.y;el.style.opacity=1;return sit(2000,5000)}
+    const onScreen=st.y-scrollY>-40&&st.y-scrollY<innerHeight+40;
+    if(onScreen&&Math.abs(target.y-st.y)<280)jumpTo(target.e);else enter(target.e);
+  }
+  function decide(){
+    const p=edge(st.e);if(!p)return relocate();
+    if(lesson()){if(!st.e.matches('section.card'))return relocate(true);
+      return Math.random()<.25?set('sleep',rnd(12e3,22e3)):sit(5000,10000)}
+    if(!inView(p))return relocate();
+    const sat=now-st.since>25e3,r=Math.random();
+    if(RM())return sat&&r<.3?set('sleep',rnd(15e3,30e3)):sit(4000,9000);
+    if(r<.42&&p.x2-p.x1>40){let tx=rnd(p.x1,p.x2),n=0;while(Math.abs(tx-st.x)<30&&n++<5)tx=rnd(p.x1,p.x2);return walkTo(tx)}
+    if(r<.62){const o=nearestVisible(st.e);if(o&&Math.abs(o.y-st.y)<280)return jumpTo(o.e)}
+    if(sat&&r<.8){st.since=now;return set('sleep',rnd(14e3,28e3))}
+    sit(3000,8000);
+  }
+
+  // ---- Zeichnen
+  let shown=null;
+  function pose(n){if(shown===n)return;shown=n;svg.querySelectorAll('.pose').forEach(g=>g.style.opacity=g.dataset.p===n?1:0)}
+  function standLegs(amp,lift,crouch,spread){
+    R.lg.setAttribute('d',HIPS.map((h,i)=>{const a=st.phase+OFF[i];
+      const dx=spread?(i<2?-3.5:3.5)*spread:Math.sin(a)*amp,up=spread?2*spread:Math.max(0,Math.cos(a))*lift;
+      return`M${h} ${23.5+crouch}L${(h+dx).toFixed(2)} ${(31-up).toFixed(2)}`}).join(''));
+    R.bd.setAttribute('transform',`translate(0 ${crouch.toFixed(2)})`);
+  }
+  function draw(){
+    const t=now,m=st.mode,still=RM();
+    const sway=still?0:Math.sin(t/700);
+    if(m==='sleep'){pose('sleep');R.br.setAttribute('transform',still?'':`translate(0 31) scale(1 ${(1+.035*Math.sin(t/650)).toFixed(4)}) translate(0 -31)`)}
+    else if(m==='sit'||m==='wait'){pose('sit');
+      const w=sway*1.1;R.st.setAttribute('d',`M15 30C${(9+w).toFixed(2)} 31.5 ${(4+w).toFixed(2)} 30 ${(5+w*.7).toFixed(2)} ${(25-Math.abs(w)*.4).toFixed(2)}`);
+      const b=(t%4300)<130;R.ey.style.opacity=b?0:1;R.cl.style.opacity=b?1:0}
+    else{pose('stand');
+      const happy=m==='happy',wag=happy?Math.sin(t/140)*1.6:sway*.8;
+      R.tl.setAttribute('d',happy?`M12 16C8 12 ${(9+wag).toFixed(2)} 6 ${(7+wag).toFixed(2)} 2`:`M12 17C${(6+wag).toFixed(2)} 16 ${(4+wag*.6).toFixed(2)} 11 ${(6+wag).toFixed(2)} ${(6+Math.abs(wag)*.3).toFixed(2)}`);
+      const k=Math.min(1,(t-st.t0)/Math.max(1,st.until-st.t0));
+      if(m==='crouch')standLegs(0,0,1.6*ease(k),0);
+      else if(m==='land')standLegs(0,0,1.6*(1-ease(k)),0);
+      else if(m==='air')standLegs(0,0,0,Math.sin(Math.PI*k));
+      else{const amp=Math.min(1,st.v/22)*2.2;standLegs(amp,amp*.75,0,0);
+        R.hd.setAttribute('transform',`translate(0 ${(-Math.abs(Math.sin(st.phase))*amp*.18).toFixed(2)})`)}
+    }
+    el.style.transform=`translate3d(${st.x.toFixed(2)}px,${(st.y-31).toFixed(2)}px,0)`;
+  }
+
+  // ---- Schleife
   function tick(t){
-    raf=requestAnimationFrame(tick);const dt=Math.min(100,t-(last||t));last=t;
-    if(document.hidden)return;
-    el.style.visibility=st.mode==='wait'?'hidden':'';
-    if(st.mode==='jump'){const j=st.j,k=Math.min(1,(t-j.t0)/650),e=edge(j.p);if(!e){st.mode='idle';return choose()}
-      st.x=j.x0+(j.x1-j.x0)*k;st.y=j.y0+(e.y-j.y0)*k-Math.sin(Math.PI*k)*Math.min(140,40+Math.abs(e.y-j.y0)*.3);
-      pose('walk0');place(st.x,st.y);if(k>=1){st.p=j.p;st.y=e.y;st.mode='sit';st.until=t+rnd(1500,4000)}return}
-    const e=edge(st.p);if(!e){if(st.mode!=='wait'||t>st.until)choose();return}
-    st.y=e.y;st.x=Math.min(Math.max(st.x,e.x1),e.x2);
-    if(st.mode==='walk'){const d=st.tx-st.x,v=.045*dt;st.dir=d<0?-1:1;el.classList.toggle('left',st.dir<0);
-      if(Math.abs(d)<=v){st.x=st.tx;st.mode='sit';st.until=t+rnd(2e3,5e3)}else st.x+=Math.sign(d)*v;
-      pose(Math.floor(t/170)%2?'walk1':'walk0')}
-    else if(st.mode==='happy'){pose('happy');if(t>st.until){st.mode='sit';st.until=t+rnd(3e3,6e3)}}
-    else if(st.mode==='sleep'){pose('sleep');if(t>st.until)choose()}
-    else{pose(st.mode==='sit'&&t%4200<160?'blink':'sit');if(t>st.until)choose()}
-    place(st.x,st.y);
+    raf=requestAnimationFrame(tick);
+    const dt=Math.min(50,t-(now||t))/1000;now=t;
+    if(document.hidden||!st)return;
+    const m=st.mode;
+    if(m==='air'){const j=st.j,k=Math.min(1,(t-st.t0)/j.dur),p=edge(j.e);if(!p){relocate(true);return draw()}
+      const e=ease(k);st.x=j.x0+(j.x1-j.x0)*e;st.y=j.y0+(p.y-j.y0)*e-(30+Math.min(60,Math.abs(p.y-j.y0)*.25))*4*k*(1-k);
+      if(k>=1){st.e=j.e;st.y=p.y;st.x=j.x1;set('land',170)}
+      return draw()}
+    if(m==='wait'){if(t>st.until)relocate(true);return}
+    const p=edge(st.e);if(!p){relocate(!lesson()&&false);return draw()}
+    st.y=p.y;
+    if(m==='walk'){
+      const d=st.tx-st.x,dist=Math.abs(d),a=90,vmax=36;
+      const target=Math.min(vmax,Math.sqrt(2*a*dist));st.v=st.v<target?Math.min(target,st.v+a*dt):target;
+      const step=st.v*dt;
+      if(dist<=Math.max(step,.3)){st.x=st.tx;st.v=0;sit(2500,7000)}
+      else{st.x+=Math.sign(d)*step;st.phase+=step*TAU/11}
+    }else{st.x=Math.min(Math.max(st.x,p.x1),p.x2)}
+    if(m==='turn'&&t>st.until){st.v=0;set('walk')}
+    else if(m==='crouch'&&t>st.until)set('air',st.j.dur);
+    else if(m==='land'&&t>st.until){st.since=st.since||t;sit(2500,6000)}
+    else if((m==='sit'||m==='sleep'||m==='happy')&&t>st.until)decide();
+    draw();
   }
   function fx(txt){const f=document.createElement('span');f.className='fx';f.textContent=txt;el.appendChild(f);setTimeout(()=>f.remove(),1700)}
-  function pet(){if(!st)return;fx(st.mode==='sleep'?'?!':'♥');st.mode='happy';st.until=last+1400}
-  function cheer(){if(st&&st.mode!=='jump'){st.mode='happy';st.until=last+1600}}
+  function pet(){if(!st)return;if(st.mode==='sleep'){fx('?!');st.since=now;return sit(3000,6000)}fx('♥');if(st.mode==='sit')set('happy',1500)}
+  function cheer(){if(st&&(st.mode==='sit'||st.mode==='sleep'))set('happy',1600)}
   function sync(){
     if(S.opt.cat&&!el){
-      el=document.createElement('div');el.id='cat';el.setAttribute('aria-hidden','true');
-      svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 48 32');el.appendChild(svg);
+      el=document.createElement('div');el.id='cat';el.setAttribute('aria-hidden','true');el.style.opacity=0;
+      svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 48 32');svg.innerHTML=SVG;el.appendChild(svg);
+      const q=s=>svg.querySelector(s);
+      R={tl:q('[data-p=stand] .tl'),lg:q('.lg'),bd:q('.bd'),hd:q('[data-p=stand] .hd'),st:q('[data-p=sit] .tl'),ey:q('.ey'),cl:q('.cl'),br:q('.br')};
       svg.addEventListener('click',pet);document.body.appendChild(el);
-      st={x:16,y:0,mode:'idle',until:0,pose:null,dir:1};{const P=perches(true),p=P[0]||perches(false)[0];if(p){st.p=p;st.x=rnd(p.x1,p.x2);st.y=p.y;st.mode='sit';st.until=performance.now()+rnd(2e3,4e3)}else choose()}raf=requestAnimationFrame(tick);
-      // Seite gewechselt → neuen Platz suchen; richtige Antwort → Freude
-      if(!obs)obs=new MutationObserver(()=>{if(!st)return;if(app.querySelector('.res.ok:not([data-cat])')){app.querySelectorAll('.res.ok').forEach(e=>e.dataset.cat=1);cheer()}
-        if(st.p&&!st.p.e.isConnected){st.p=null;st.mode='wait';st.until=0}}).observe(app,{childList:true,subtree:true})||true;
+      st={x:0,y:0,e:null,mode:'wait',t0:0,until:0,dir:1,phase:0,v:0,since:performance.now()};
+      now=performance.now();relocate(true);draw();raf=requestAnimationFrame(tick);
+      if(!obs)obs=new MutationObserver(()=>{if(!st)return;
+        if(app.querySelector('.res.ok:not([data-cat])')){app.querySelectorAll('.res.ok').forEach(e=>e.dataset.cat=1);cheer()}
+        if(st.e&&!st.e.isConnected&&st.mode!=='air'){st.e=null;el.style.opacity=0;set('wait',350)}}).observe(app,{childList:true,subtree:true})||true;
     }else if(!S.opt.cat&&el){cancelAnimationFrame(raf);el.remove();el=null;st=null}
   }
   return{sync};
