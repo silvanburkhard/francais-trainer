@@ -751,11 +751,29 @@ function judgeList(input,acc,half){
 const judge=(input,answer)=>judgeList(input,answer.split('/'));
 
 const CARDS={}; // id -> {type, topic, ...}
+// Bestimmter statt unbestimmter Artikel (und umgekehrt) – das Geschlecht muss stimmen.
+function artVariants(alts,raw){
+  const g=/\(m\./.test(raw)?'m':/\(f\./.test(raw)?'f':'';
+  const V=/^[aeiouyhéèêâîôœ]/i,out=[];
+  const swap=w=>{let m;
+    if(m=w.match(/^le (.+)$/))return['un '+m[1]];
+    if(m=w.match(/^la (.+)$/))return['une '+m[1]];
+    if(m=w.match(/^les (.+)$/))return['des '+m[1]];
+    if(m=w.match(/^des (.+)$/))return['les '+m[1]];
+    if(m=w.match(/^un (.+)$/))return[V.test(m[1])?"l'"+m[1]:'le '+m[1]];
+    if(m=w.match(/^une (.+)$/))return[V.test(m[1])?"l'"+m[1]:'la '+m[1]];
+    if(m=w.match(/^l'(.+)$/))return g==='m'?['un '+m[1]]:g==='f'?['une '+m[1]]:['un '+m[1],'une '+m[1]];
+    return[]};
+  alts.map(clean).forEach(a=>{const parts=a.split('/');
+    if(parts.length===1)out.push(...swap(a));
+    else{const sw=parts.map(swap);if(sw.every(x=>x.length)){out.push(sw.map(x=>x[0]).join('/'));out.push(sw[0][0])}}});
+  return out;
+}
 VERBS.forEach(v=>CARDS['v:'+v.fr]={type:'verb',topic:'verbs',v});
 VOCAB_RAW.split('\n').forEach(l=>{
   const[fr,de]=l.split('|'),alts=fr.split(' ; '),disp=alts[0];
   const acc=[];alts.forEach(a=>{const c=clean(a);acc.push(c);if(c.includes('/'))acc.push(c.split('/')[0])});
-  CARDS['w:'+disp]={type:'vocab',topic:'vocab',fr:disp,de,acc};
+  CARDS['w:'+disp]={type:'vocab',topic:'vocab',fr:disp,de,acc,art:artVariants(alts,fr)};
 });
 PAIR_RAW.split('\n').forEach(l=>{const[g,fr,de]=l.split('|');CARDS['p:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr]};
   CARDS['q:'+fr]={type:'pair',topic:'comp',g,fr,de,acc:[fr],prep:true}}); // q: = nur Präposition, eigener Lernstand
@@ -771,7 +789,7 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full'},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,artLoose:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full'},S.opt);
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
@@ -969,6 +987,7 @@ function settings(){
   </div></section>
   <section class="section"><h2>Abfrage</h2><div class="group">
     <div class="setrow"><label class="lbl" for="strict"><b>Akzente streng bewerten</b><span>Ein fehlender oder falscher Akzent zählt als Fehler statt als «fast richtig».</span></label><input type="checkbox" class="toggle" id="strict" ${o.strict?'checked':''}></div>
+    <div class="setrow"><label class="lbl" for="artLoose"><b>Artikel bei Nomen locker bewerten</b><span>«un» statt «le», «une» statt «la» oder «des» statt «les» zählt als richtig. Das Geschlecht muss aber stimmen: «le décision» bleibt falsch.</span></label><input type="checkbox" class="toggle" id="artLoose" ${o.artLoose?'checked':''}></div>
   </div><p class="hint">Richtung und Antwortart (Tippen, Karteikarte oder Auswahl) stellst du direkt über dem Lernen-Knopf um. Verben fragt «Auswahl» weiterhin zum Eintippen ab, die Prüfung immer.</p></section>
   <section class="section"><h2>Runden</h2><div class="group">
     <div class="setrow col"><div class="lbl"><b>Fragen pro Runde</b><span>Gilt für «Lernkartei üben», «Fällige lernen» und die Prüfung. In der Prüfung werden die Fragen gleichmässig auf alle Themen verteilt. «Alle durchgehen» nimmt immer alle Karten.</span></div>${seg('examLen',[[10,'10'],[20,'20'],[30,'30'],[50,'50']],o.examLen,'Fragen pro Runde')}</div>
@@ -982,7 +1001,7 @@ function settings(){
   </div></section>`;
   const set=(k,v)=>{if(k==='dir')S.dir=v;else o[k]=v;save();applyTheme();const f=document.activeElement&&document.activeElement.name;settings();if(f){const n=app.querySelector(`input[name=${f}]:checked`);n&&n.focus()}};
   app.querySelectorAll('.seg input').forEach(r=>r.onchange=()=>set(r.name,r.name==='examLen'?+r.value:r.value));
-  ['strict','accBar'].forEach(k=>$(k).onchange=e=>{o[k]=e.target.checked;save()});
+  ['strict','artLoose','accBar'].forEach(k=>$(k).onchange=e=>{o[k]=e.target.checked;save()});
   $('algo').onchange=e=>{o.algo=e.target.checked;save();settings();$('algo').focus()};
   confirmReset('reset','Alles löschen?',()=>{S.cards={};S.box={};S.free={};S.session=null},settings);
 }
@@ -1300,13 +1319,14 @@ function checkSingle(choice){
   const c=cur.c;let input=choice;
   if(input===undefined){const a=$('ans');input=a.value;a.readOnly=true}
   const acc=c.type==='item'?c.a:c.acc;
-  const r=judgeList(input,acc,c.half);
+  let r=judgeList(input,acc,c.half),artAlt=false;
+  if(r>0&&S.opt.artLoose&&c.art&&c.art.length){const r2=judgeList(input,c.art);if(r2<r){r=r2;artAlt=true}}
   cur.errors=r;cur.phase='checked';
   const cls=r===0?'ok':r<1?'warn':'bad';
   if(c.o){app.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(acc.includes(b.dataset.o))b.classList.add('ok');else if(b.dataset.o===input)b.classList.add('bad')})}
   else{$('ans').className=cls;
     const shown=c.type==='vocab'?c.fr:c.type==='pair'?c.fr:acc[0],fm=forms(c);
-    $('fix').innerHTML=r===0?fm:`<p class="res ${cls}" style="margin:8px 0 0">${r<1?'Fast – richtig ist':'Richtig ist'}:${fm?'':` <b lang="fr">${esc(shown)}</b>`}</p>${fm}`;}
+    $('fix').innerHTML=r===0?(artAlt?`<p class="res ok" style="margin:8px 0 0">Anderer Artikel – zählt als richtig. Im Buch: <b lang="fr">${esc(shown)}</b></p>`:'')+fm:`<p class="res ${cls}" style="margin:8px 0 0">${r<1?'Fast – richtig ist':'Richtig ist'}:${fm?'':` <b lang="fr">${esc(shown)}</b>`}</p>${fm}`;}
   const msg=r===0?'✓ Richtig':r<1?(c.half&&c.half.includes(input)?'~ Fast: Zusammenziehung beachten':'~ Fast: Akzent beachten'):'✗ Falsch';
   let why=c.w||'';
   if(c.type==='vocab'&&r>0)why=`${esc(c.fr)} = ${esc(c.de)}`;
