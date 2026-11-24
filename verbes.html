@@ -130,7 +130,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 @media (max-width:360px){.boxes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .boxbtn{display:flex;flex-direction:column;justify-content:space-between;gap:4px;min-height:76px;padding:8px 6px;border:1.5px solid var(--text);border-radius:0;background:transparent;color:var(--text);text-align:left}
 .boxbtn span{font-size:0.75rem;font-weight:700;color:var(--muted);overflow-wrap:anywhere}
-.boxbtn b{font-size:1.625rem;line-height:1;font-variant-numeric:tabular-nums}
+.boxbtn b{font-size:clamp(1.125rem,5.6vw,1.625rem);line-height:1;font-variant-numeric:tabular-nums}
 .boxbtn.done{background:var(--text);color:var(--bg)}
 .boxbtn.done span{color:var(--bg);opacity:.75}
 .boxbtn:not(:disabled):hover{background:var(--text);color:var(--bg)}
@@ -153,6 +153,7 @@ details summary .plab{font-size:0.8125rem}
 .setrow:first-child{border-top:0}
 .setrow.col{display:block}
 .setrow.col .seg{margin-top:12px}
+.dt{font:inherit;font-size:1rem;color:var(--text);background:var(--field);border:0;border-bottom:2px solid var(--text);border-radius:0;padding:8px 10px;min-height:44px;max-width:60%}
 .lbl{flex:1;min-width:0}
 .lbl b{display:block;font-weight:700}
 .lbl span{display:block;color:var(--muted);font-size:0.9375rem}
@@ -180,7 +181,7 @@ details summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px}
 .bar i{display:block;height:100%;background:var(--text);transition:width .3s}
 .tense{color:var(--muted);font-size:0.9375rem;font-weight:700}
 .word{font-size:clamp(2rem,8vw,3rem);font-weight:700;letter-spacing:-.02em;margin:8px 0 0;line-height:1.1;overflow-wrap:break-word;hyphens:auto}
-.word.q{font-size:1.625rem;letter-spacing:0;line-height:1.3}
+.word.q{font-size:1.625rem;letter-spacing:0;line-height:1.3;hyphens:manual}
 .gap{display:inline-block;min-width:60px;border-bottom:3px solid var(--text);text-align:center}
 .qhint{color:var(--muted);font-size:0.9375rem;margin-top:8px}
 .line{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
@@ -233,6 +234,25 @@ footer p{margin:0;display:flex;align-items:center;gap:8px;min-height:44px}
 .legal h2{font-size:1.375rem;margin:32px 0 8px}
 .legal p{margin:0 0 12px}
 @media (prefers-reduced-motion:reduce){.bar i,.toggle,.toggle::after{transition:none}}
+/* Countdown zur Prüfung */
+.cd{text-align:center;padding:28px 0 32px;border-bottom:1px solid var(--line)}
+.cd-lbl{display:block;font-size:0.8125rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cd-num{display:flex;justify-content:center;align-items:flex-start;gap:clamp(4px,2vw,14px);margin-top:10px;font-variant-numeric:tabular-nums}
+.cd-seg b{display:block;font-size:clamp(3rem,16vw,6.5rem);line-height:1;font-weight:700;letter-spacing:-.03em}
+.cd-seg small{display:block;margin-top:6px;font-size:0.75rem;font-weight:700;color:var(--muted)}
+.cd-sep{font-size:clamp(3rem,16vw,6.5rem);line-height:1;font-weight:700;color:var(--muted)}
+.cd-date{display:block;margin-top:14px;font-size:0.9375rem;color:var(--muted)}
+.cd-done{display:block;margin-top:10px;font-size:clamp(2.5rem,12vw,5rem);line-height:1;font-weight:700;letter-spacing:-.02em}
+.cd-mini{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cd+h1{margin-top:32px}
+/* Katze */
+#cat{position:absolute;left:0;top:0;width:48px;height:32px;z-index:5;pointer-events:none;will-change:transform}
+#cat svg{display:block;width:48px;height:32px;overflow:visible;pointer-events:auto;cursor:pointer;stroke:var(--text);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+#cat .f{fill:var(--bg)}#cat .n{fill:none}#cat .e{fill:var(--text);stroke:none}
+#cat.left svg{transform:scaleX(-1)}
+#cat .fx{position:absolute;left:18px;top:-14px;font-size:0.875rem;font-weight:700;color:var(--text);pointer-events:none;animation:catfx 1.6s ease-out forwards}
+@keyframes catfx{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22px)}}
+@media (prefers-reduced-motion:reduce){#cat .fx{animation:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -789,7 +809,7 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,artLoose:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full'},S.opt);
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,artLoose:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full',cd:true,cat:true,examAt:Date.UTC(2026,10,25,10,25)},S.opt); // 25.11.2026, 11:25 Schweizer Zeit
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
@@ -875,9 +895,38 @@ function confirmReset(spanId,label,doReset,back){on(spanId+'Btn',()=>{$(spanId).
 // ===================== TOP-LEISTE =====================
 const GEAR='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 // crumb: Name der aktuellen Seite (leer = Startseite)
+// ===================== COUNTDOWN =====================
+const pad2=n=>String(n).padStart(2,'0');
+function cdParts(){const ms=S.opt.examAt-Date.now();if(ms<=0)return null;const t=Math.floor(ms/1000);return{d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60}}
+const cdLive=()=>S.opt.cd&&Date.now()<S.opt.examAt+3*3600e3; // bis 3 h nach Beginn sichtbar
+function cdDate(){return new Date(S.opt.examAt).toLocaleString('de-CH',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).replace(/ um /,', ')+' Uhr'}
+function cdLabel(p){return p?`${p.d?p.d+(p.d>1?' Tage, ':' Tag, '):''}${p.h} Stunden, ${p.m} Minuten`:'Die Prüfung hat begonnen'}
+function cdBig(){
+  if(!cdLive())return'';const p=cdParts();
+  if(!p)return`<section class="cd" aria-label="Prüfung"><span class="cd-lbl">Prüfung</span><span class="cd-done">Viel Glück!</span><span class="cd-date">${esc(cdDate())}</span></section>`;
+  const seg=(k,v,l)=>`<span class="cd-seg"><b data-cd="${k}">${v}</b><small>${l}</small></span>`,sep='<span class="cd-sep" aria-hidden="true">:</span>';
+  return`<section class="cd" role="timer" aria-label="Zeit bis zur Prüfung: ${cdLabel(p)}" data-cd="box">
+    <span class="cd-lbl" aria-hidden="true">Zeit bis zur Prüfung</span>
+    <div class="cd-num" aria-hidden="true">${p.d?seg('d',p.d,p.d>1?'Tage':'Tag')+sep:''}${seg('h',pad2(p.h),'Std.')}${sep}${seg('m',pad2(p.m),'Min.')}${sep}${seg('s',pad2(p.s),'Sek.')}</div>
+    <span class="cd-date">${esc(cdDate())}</span></section>`;
+}
+function cdMiniText(){const p=cdParts();return p?`${p.d?p.d+' T ':''}${pad2(p.h)}:${pad2(p.m)}:${pad2(p.s)}`:'Viel Glück!'}
+const cdMini=()=>cdLive()?`<span class="cd-mini" title="Zeit bis zur Prüfung" aria-label="Zeit bis zur Prüfung" data-cd="mini">${cdMiniText()}</span>`:'';
+let cdLastMin=-1,cdHadDays=null;
+setInterval(()=>{
+  const box=app.querySelector('[data-cd=box]'),mini=app.querySelector('[data-cd=mini]');
+  if(!box&&!mini)return;
+  const p=cdParts();
+  if(!p||(cdHadDays!==null&&cdHadDays!==!!p.d)){cdHadDays=null;if(!cur)route();return} // Wechsel der Anzeige: Seite neu zeichnen
+  cdHadDays=!!p.d;
+  if(mini)mini.textContent=cdMiniText();
+  if(box){['d','h','m','s'].forEach(k=>{const e=box.querySelector(`[data-cd=${k}]`);if(e)e.textContent=k==='d'?p.d:pad2(p[k])});
+    if(p.m!==cdLastMin){cdLastMin=p.m;box.setAttribute('aria-label','Zeit bis zur Prüfung: '+cdLabel(p))}}
+},1000);
+
 function topbar(crumb){
   return`<nav class="topbar" aria-label="Navigation"><span class="crumb">${crumb?`<a href="#">Français</a><span aria-hidden="true">/</span><b aria-current="page">${crumb}</b>`:'<b>Français</b>'}</span>
-  ${crumb==='Einstellungen'?'':`<a class="set" href="#einstellungen">${GEAR}<span>Einstellungen</span></a>`}</nav>`;
+  ${crumb?cdMini():''}${crumb==='Einstellungen'?'':`<a class="set" href="#einstellungen">${GEAR}<span>Einstellungen</span></a>`}</nav>`;
 }
 
 // ===================== LERNKARTEI =====================
@@ -911,6 +960,7 @@ function home(){
   const groups=[...new Set(TOPICS.map(t=>t.group))];
   app.innerHTML=`
   ${topbar('')}
+  ${cdBig()}
   <h1>Dossier 5</h1><p class="sub">Vokabeln, Verben und Grammatik für die Prüfung.</p>
   <section class="section"><h2>${FREE()?'Üben':BOX()?'Lernkartei':'Heute'}</h2>
     ${BOX()?boxStrip(all):FREE()?`<div class="stats">
@@ -996,12 +1046,20 @@ function settings(){
     <div class="setrow"><label class="lbl" for="accBar"><b>Akzentleiste anzeigen</b><span>Tasten für é, è, ç … unten am Bildschirm.</span></label><input type="checkbox" class="toggle" id="accBar" ${o.accBar?'checked':''}></div>
     <div class="setrow col"><div class="lbl"><b>Erscheinungsbild</b><span>«Automatisch» folgt der Einstellung deines Geräts.</span></div>${seg('theme',[['auto','Automatisch'],['light','Hell'],['dark','Dunkel']],o.theme,'Erscheinungsbild')}</div>
   </div></section>
+  <section class="section"><h2>Prüfung &amp; Extras</h2><div class="group">
+    <div class="setrow"><label class="lbl" for="cd"><b>Countdown anzeigen</b><span>Zeit bis zur Prüfung, gross auf der Startseite und klein oben auf den anderen Seiten.</span></label><input type="checkbox" class="toggle" id="cd" ${o.cd?'checked':''}></div>
+    ${o.cd?`<div class="setrow"><label class="lbl" for="examAt"><b>Prüfungstermin</b><span>${esc(cdDate())}</span></label><input type="datetime-local" id="examAt" class="dt" value="${(d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`)(new Date(o.examAt))}"></div>`:''}
+    <div class="setrow"><label class="lbl" for="optCat"><b>Katze anzeigen</b><span>Eine kleine Katze spaziert über die Linien der Seite. Beim Lernen sitzt sie still. Antippen zum Streicheln.</span></label><input type="checkbox" class="toggle" id="optCat" ${o.cat?'checked':''}></div>
+  </div></section>
   <section class="section"><h2>Daten</h2><div class="group">
     <div class="setrow"><div class="lbl"><b>Gesamten Fortschritt zurücksetzen</b><span>Löscht den Lernstand aller Themen auf diesem Gerät.</span></div><span id="reset"><button class="link danger" id="resetBtn">Zurücksetzen</button></span></div>
   </div></section>`;
   const set=(k,v)=>{if(k==='dir')S.dir=v;else o[k]=v;save();applyTheme();const f=document.activeElement&&document.activeElement.name;settings();if(f){const n=app.querySelector(`input[name=${f}]:checked`);n&&n.focus()}};
   app.querySelectorAll('.seg input').forEach(r=>r.onchange=()=>set(r.name,r.name==='examLen'?+r.value:r.value));
   ['strict','artLoose','accBar'].forEach(k=>$(k).onchange=e=>{o[k]=e.target.checked;save()});
+  $('cd').onchange=e=>{o.cd=e.target.checked;save();settings();$('cd').focus()};
+  $('optCat').onchange=e=>{o.cat=e.target.checked;save();Cat.sync()};
+  if($('examAt'))$('examAt').onchange=e=>{const t=new Date(e.target.value).getTime();if(t){o.examAt=t;save();settings();$('examAt').focus()}};
   $('algo').onchange=e=>{o.algo=e.target.checked;save();settings();$('algo').focus()};
   confirmReset('reset','Alles löschen?',()=>{S.cards={};S.box={};S.free={};S.session=null},settings);
 }
@@ -1465,6 +1523,93 @@ datenschutz:`<h1>Datenschutz</h1>
 <h2>Keine Gewähr für die Inhalte</h2>
 <p>Die Vokabeln, Konjugationen, Übungen und Erklärungen habe ich mit Sorgfalt zusammengestellt. Trotzdem können Fehler darin sein, und ich übernehme keine Gewähr für Richtigkeit und Vollständigkeit. Verlass dich im Zweifel auf dein Lehrmittel oder frag deine Lehrperson. Wenn du einen Fehler findest, schreib mir gerne eine E-Mail.</p>`};
 function legal(k){cur=null;app.innerHTML=`${topbar('Datenschutz')}<article class="legal">${LEGAL[k]}</article>`;scrollTo(0,0)}
+// ===================== KATZE =====================
+// Strichzeichnung im Stil der Seite: 1.5px Linie, gefüllt mit Hintergrundfarbe, damit sie «auf» den Linien sitzt.
+const Cat=(()=>{
+  const TAIL={down:'M12 17C6 16 4 11 6 6',up:'M12 16C8 12 9 6 7 2'};
+  const STAND=(legs,tail)=>`<path class="n" d="${tail}"/><path class="n" d="${legs}"/>
+    <path class="f" d="M12 19C11.5 14.5 15 12.6 20 13.2C25 13.8 30 12.6 33.5 15C35.5 17 35 21.5 32 23.5C29 25 18 25 15.5 24C13 23 12.2 21 12 19Z"/>
+    <path class="f" d="M32.6 8.6L33 2.6L36.4 6.4L39.6 6.4L42 2.6L42.4 8.6A6 6 0 1 1 32.6 8.6Z"/><circle class="e" cx="39.6" cy="11.4" r=".9"/>`;
+  const LEGS=['M15 24L14 31M19 24L20 31M28 24L27 31M32 24L33 31','M15 24L16.5 31M19 24L17.5 31M28 24L29.5 31M32 24L30.5 31'];
+  const POSE={
+    walk0:STAND(LEGS[0],TAIL.down),walk1:STAND(LEGS[1],TAIL.down),happy:STAND(LEGS[0],TAIL.up),
+    sit:`<path class="n" d="M15 30C9 31.5 4 30 5 25"/><path class="f" d="M14 31C12 24 14 15 22 14C27 14 29 19 30 24L30 31Z"/><path class="n" d="M26 21L26 31"/>
+      <path class="f" d="M22.6 6.6L23 0.6L26.4 4.4L29.6 4.4L32 0.6L32.4 6.6A6 6 0 1 1 22.6 6.6Z"/><circle class="e" cx="29.4" cy="9.4" r=".9"/>`,
+    blink:`<path class="n" d="M15 30C9 31.5 4 30 5 25"/><path class="f" d="M14 31C12 24 14 15 22 14C27 14 29 19 30 24L30 31Z"/><path class="n" d="M26 21L26 31"/>
+      <path class="f" d="M22.6 6.6L23 0.6L26.4 4.4L29.6 4.4L32 0.6L32.4 6.6A6 6 0 1 1 22.6 6.6Z"/><path class="n" d="M28.4 9.6Q29.4 10.4 30.4 9.6"/>`,
+    sleep:`<path class="n" d="M11 30.5C11 33 24 33 29 31"/><path class="f" d="M10 31C8 25 13 20 22 20C31 20 36 24 36 31Z"/>
+      <path class="f" d="M29 23.2L29.4 18.4L32.4 21.4L34.6 21.4L37.6 18.4L38 23.2A5.4 5.4 0 1 1 29 23.2Z"/><path class="n" d="M33 26.2Q34 27 35 26.2"/>`
+  };
+  let el,svg,st=null,raf=0,last=0,obs=false;
+  const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const lesson=()=>!!cur; // Lernrunde läuft
+  // Sitzplätze: Oberkanten von Linien, Karten und Überschriften
+  function perches(onlyVisible){
+    // nur Stellen mit freiem Raum darüber: Überschriften (Textbreite) und die Linie unter dem Countdown
+    const sel=lesson()?'#app section.card':'#app .cd,#app h1,#app section>h2';
+    const out=[],vh=innerHeight;
+    app.querySelectorAll(sel).forEach(e=>{const p=edge({e});if(!p||p.x2-p.x1<20)return;
+      const vy=p.y-scrollY;if(onlyVisible&&(vy<70||vy>vh-20))return;out.push({e,...p})});
+    return out;
+  }
+  function edge(p){ // Position neu messen (Layout kann sich ändern)
+    if(!p||!p.e.isConnected)return null;const e=p.e;let r=e.getBoundingClientRect(),y;
+    if(/^H[12]$/.test(e.tagName)){const g=document.createRange();g.selectNodeContents(e);r=g.getBoundingClientRect();y=r.top+(e.tagName==='H1'?8:4)}
+    else y=e.classList.contains('cd')?r.bottom:r.top;
+    if(!r.width)return null;
+    return{x1:r.left+scrollX,x2:Math.max(r.left+scrollX,r.right+scrollX-48),y:y+scrollY};
+  }
+  function pose(n){if(st.pose===n)return;st.pose=n;svg.innerHTML=POSE[n]}
+  function place(x,y){el.style.transform=`translate(${Math.round(x)}px,${Math.round(y-31)}px)`}
+  function choose(){ // nächste Handlung
+    const P=perches(true);
+    if(lesson()){const p=P[0]||perches(false)[0];if(!p)return hide();
+      if(st.p&&st.p.e!==p.e)return jumpTo(p,p.x2-8);
+      st.p=p;st.x=p.x2-8;st.mode=Math.random()<.25?'sleep':'sit';st.until=last+rnd(6e3,14e3);return}
+    const r=Math.random(),e0=st.p&&edge(st.p),vy=e0&&e0.y-scrollY,away=!e0||vy<70||vy>innerHeight-20,narrow=e0&&e0.x2-e0.x1<90;
+    if(away||(P.length&&r<(narrow?.6:.3)&&!RM())){const p=P.length?P[Math.random()*P.length|0]:perches(false)[0];if(!p)return hide();
+      return RM()?(st.p=p,st.x=rnd(p.x1,p.x2),st.mode='sit',st.until=last+rnd(4e3,8e3)):jumpTo(p,rnd(p.x1,p.x2))}
+    if(r<.72&&!RM()){const e=edge(st.p);st.mode='walk';st.tx=rnd(e.x1,e.x2);return}
+    if(r<.86){st.mode='sleep';st.until=last+rnd(8e3,16e3);return}
+    st.mode='sit';st.until=last+rnd(2500,6000);
+  }
+  function jumpTo(p,x){const e=edge(st.p)||{y:st.y};st.mode='jump';st.j={x0:st.x,y0:st.y??e.y,p,x1:x,t0:last};st.dir=x<st.x?-1:1;el.classList.toggle('left',st.dir<0)}
+  function hide(){el.style.visibility='hidden';st.mode='wait';st.until=last+1500}
+  function tick(t){
+    raf=requestAnimationFrame(tick);const dt=Math.min(100,t-(last||t));last=t;
+    if(document.hidden)return;
+    el.style.visibility=st.mode==='wait'?'hidden':'';
+    if(st.mode==='jump'){const j=st.j,k=Math.min(1,(t-j.t0)/650),e=edge(j.p);if(!e){st.mode='idle';return choose()}
+      st.x=j.x0+(j.x1-j.x0)*k;st.y=j.y0+(e.y-j.y0)*k-Math.sin(Math.PI*k)*Math.min(140,40+Math.abs(e.y-j.y0)*.3);
+      pose('walk0');place(st.x,st.y);if(k>=1){st.p=j.p;st.y=e.y;st.mode='sit';st.until=t+rnd(1500,4000)}return}
+    const e=edge(st.p);if(!e){if(st.mode!=='wait'||t>st.until)choose();return}
+    st.y=e.y;st.x=Math.min(Math.max(st.x,e.x1),e.x2);
+    if(st.mode==='walk'){const d=st.tx-st.x,v=.045*dt;st.dir=d<0?-1:1;el.classList.toggle('left',st.dir<0);
+      if(Math.abs(d)<=v){st.x=st.tx;st.mode='sit';st.until=t+rnd(2e3,5e3)}else st.x+=Math.sign(d)*v;
+      pose(Math.floor(t/170)%2?'walk1':'walk0')}
+    else if(st.mode==='happy'){pose('happy');if(t>st.until){st.mode='sit';st.until=t+rnd(3e3,6e3)}}
+    else if(st.mode==='sleep'){pose('sleep');if(t>st.until)choose()}
+    else{pose(st.mode==='sit'&&t%4200<160?'blink':'sit');if(t>st.until)choose()}
+    place(st.x,st.y);
+  }
+  function fx(txt){const f=document.createElement('span');f.className='fx';f.textContent=txt;el.appendChild(f);setTimeout(()=>f.remove(),1700)}
+  function pet(){if(!st)return;fx(st.mode==='sleep'?'?!':'♥');st.mode='happy';st.until=last+1400}
+  function cheer(){if(st&&st.mode!=='jump'){st.mode='happy';st.until=last+1600}}
+  function sync(){
+    if(S.opt.cat&&!el){
+      el=document.createElement('div');el.id='cat';el.setAttribute('aria-hidden','true');
+      svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 48 32');el.appendChild(svg);
+      svg.addEventListener('click',pet);document.body.appendChild(el);
+      st={x:16,y:0,mode:'idle',until:0,pose:null,dir:1};{const P=perches(true),p=P[0]||perches(false)[0];if(p){st.p=p;st.x=rnd(p.x1,p.x2);st.y=p.y;st.mode='sit';st.until=performance.now()+rnd(2e3,4e3)}else choose()}raf=requestAnimationFrame(tick);
+      // Seite gewechselt → neuen Platz suchen; richtige Antwort → Freude
+      if(!obs)obs=new MutationObserver(()=>{if(!st)return;if(app.querySelector('.res.ok:not([data-cat])')){app.querySelectorAll('.res.ok').forEach(e=>e.dataset.cat=1);cheer()}
+        if(st.p&&!st.p.e.isConnected){st.p=null;st.mode='wait';st.until=0}}).observe(app,{childList:true,subtree:true})||true;
+    }else if(!S.opt.cat&&el){cancelAnimationFrame(raf);el.remove();el=null;st=null}
+  }
+  return{sync};
+})();
+
 function route(){
   const k=location.hash.slice(1);
   scrollTo(0,0);
@@ -1475,6 +1620,7 @@ function route(){
 }
 addEventListener('hashchange',route);
 route();
+Cat.sync();
 </script>
 </body>
 </html>
