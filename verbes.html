@@ -809,7 +809,8 @@ if(!S)S={sel:VERBS.map(v=>v.fr),dir:'de',cards:{},session:null};
 // Migration aus Version 1 (nur Verben)
 Object.keys(S.cards).forEach(k=>{if(!k.includes(':')){S.cards['v:'+k]=S.cards[k];delete S.cards[k]}});
 if(S.session&&(!S.session.queue||S.session.queue.some(id=>!CARDS[id])))S.session=null;
-S.opt=Object.assign({examLen:20,accBar:true,strict:false,artLoose:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full',cd:true,cat:true,examAt:Date.UTC(2026,10,25,10,25)},S.opt); // 25.11.2026, 11:25 Schweizer Zeit
+S.opt=Object.assign({examLen:20,accBar:true,strict:false,artLoose:false,theme:'auto',method:'box',answer:'type',algo:true,compMode:'full',cd:true,cat:true,examAt:Date.UTC(2026,10,25,9,40)},S.opt); // 25.11.2026, 10:40 Schweizer Zeit
+if(S.opt.examAt===Date.UTC(2026,10,25,10,25))S.opt.examAt=Date.UTC(2026,10,25,9,40); // alter Standardwert 11:25
 if(!S.opt.v2){S.dir='de';S.opt.v2=1} // neuer Standard: Deutsch → Französisch
 if(!S.opt.v3){S.opt.method='box';S.opt.v3=1} // neuer Standard: Lernkartei
 S.box=S.box||{}; // Lernkartei: Fach 0 (neu) bis 5 (gelernt)
