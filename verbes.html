@@ -245,6 +245,10 @@ footer p{margin:0;display:flex;align-items:center;gap:8px;min-height:44px}
 .cd-done{display:block;margin-top:10px;font-size:clamp(2.5rem,12vw,5rem);line-height:1;font-weight:700;letter-spacing:-.02em}
 .cd-mini{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cd+h1{margin-top:32px}
+/* Hinweis auf neue Version */
+.upd{position:fixed;left:50%;top:max(12px,env(safe-area-inset-top));transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:12px;max-width:calc(100% - 32px);padding:8px 8px 8px 16px;background:var(--text);color:var(--bg);font-size:0.9375rem;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.upd button{min-height:36px;padding:6px 14px;border:1.5px solid var(--bg);background:var(--bg);color:var(--text);font-weight:700;border-radius:0}
+.upd .x{background:transparent;color:var(--bg);border:0;padding:6px 8px;font-size:1.125rem}
 /* Katze */
 #cat{position:absolute;left:0;top:0;width:48px;height:32px;z-index:5;pointer-events:none;will-change:transform}
 #cat svg{display:block;width:48px;height:32px;overflow:visible;pointer-events:auto;cursor:pointer;stroke:var(--text);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
@@ -1665,6 +1669,25 @@ const Cat=(()=>{
     }else if(!S.opt.cat&&el){cancelAnimationFrame(raf);el.remove();el=null;st=null}
   }
   return{sync};
+})();
+
+// ===================== NEUE VERSION =====================
+// Lädt die Seite im Hintergrund neu herunter und vergleicht sie mit dem Stand beim Öffnen.
+const Upd=(()=>{
+  let base=null,shown=false,dismissed=false;
+  const hash=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h};
+  async function fetchHash(){const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;return hash(await r.text())}
+  async function check(){
+    if(shown||dismissed||!/(\.github\.io|^localhost|^127\.0\.0\.1)$/.test(location.hostname))return; // nur auf GitHub Pages (und lokal)
+    try{const h=await fetchHash();if(base===null){base=h;return}if(h!==base)show()}catch(e){}
+  }
+  function show(){shown=true;const b=document.createElement('div');b.className='upd';b.setAttribute('role','status');
+    b.innerHTML='<span>Neue Version verfügbar</span><button type="button" id="updGo">Neu laden</button><button type="button" class="x" aria-label="Schliessen">✕</button>';
+    document.body.appendChild(b);b.querySelector('#updGo').onclick=()=>location.reload();
+    b.querySelector('.x').onclick=()=>{b.remove();dismissed=true}}
+  check();setInterval(check,5*60e3);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+  return{check};
 })();
 
 function route(){
